@@ -1,0 +1,9 @@
+[submodule "Beancount-Trans-Backend"]
+	path = Beancount-Trans-Backend
+	url = https://github.com/dhr2333/Beancount-Trans-Backend.git
+[submodule "Beancount-Trans-Frontend"]
+	path = Beancount-Trans-Frontend
+	url = https://github.com/dhr2333/Beancount-Trans-Frontend.git
+[submodule "Beancount-Trans-Assets"]
+	path = Beancount-Trans-Assets
+	url = https://github.com/dhr2333/Beancount-Trans-Assets.git
