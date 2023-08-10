@@ -92,9 +92,9 @@ mysql -h127.0.0.1 -uroot -proot  beancount-trans < translate_expense_map.sql  # 
 
 ## 开始运行
 
-执行： `python manage.py runserver`
+执行： `python manage.py runserver 0:8002`
 
-浏览器打开 http://127.0.0.1:8000/translate/trans 就可以完成初步的账单转换功能。
+浏览器打开 http://127.0.0.1:8002/translate/trans 就可以完成初步的账单转换功能。
 
 # Beancount-Trans-Frontend
 
