@@ -107,6 +107,10 @@ $ npm run dev  # 启动程序
 
 为了方便用户使用，作者提供了docker-compose的部署方式，但镜像的生成还需用户手动打包。
 
+Backend 配置文件为`conf/prod.py`
+
+Frontend 配置文件为`.env`
+
 ## 镜像打包
 
 对于python依赖自行处理，不提供处理方法。
