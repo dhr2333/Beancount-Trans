@@ -1,30 +1,30 @@
-# Beancount-Trans 
+# Beancount-Trans
 经过长期对Beancount的使用和测试，我发现在日常记账中最烦恼的有以下几点：
 
 1. 由于记录数量太多，若每个记录都以单独条目记录则需要耗费大量时间，若以天为条目进行记账，又会导致条目的颗粒度太大；
 2. 我是以周为频率进行记账断言的，对于长期记账来说这个频率未免太频繁；
 3. 支出账户没有形成系统的规划，导致记录条目时总是要纠结选用哪个支出账户，且记录后也无法通过FAVA的试算表了解自己的各类支出情况；
 
-针对以上记账痛点，开发出Beancount-Trans用于账单的自动解析。
+针对以上记账痛点，开发出Beancount-**Trans用于账单的自动解析**。
 
-**上传账单，系统会根据定义好的商户和账户自动格式化输出为beancount能识别的文本**。当前已支持自动更新至Beancount-Trans-Assets项目，暂未向互联网用户开放。
+**上传账单，系统会根据定义好的商户和账户自动格式化输出为beancount能识别的文本**。当前已支持自动更新至Beancount-Trans-Assets项目，仅支持本地部署用户启用。
 
 例如"食物"会归类于Expense:Food账户，匹配到"晚餐"会归类与Expense:Food:Dinner账户，默认会归类于Expense:Other，默认情况可能需要手动进行归类。为了尽可能减少Expense:Other的出现，用户需要维护好自己的支出映射，这样能让自己的记账效率和准确性大大提升。
 
 > 项目链接：https://trans.dhr2333.cn/ 
 
-无登录解析会使用通用映射模板。测试账单可通过https://github.com/dhr2333/Beancount-Trans获取，微信账单及支付宝账单需自行百度获取。
+无登录解析时会使用通用映射模板。本项目提供测试账单，用户自己的微信及支付宝账单自行百度获取。
 
 ![Beancount-Trans 首页](https://daihaorui.oss-cn-hangzhou.aliyuncs.com/djangoblog/202310101642806.png)
 
 ## 使用步骤
 
-1. 从支付宝、微信中获取账单；
-2. 在https://trans.dhr2333.cn/trans 首页中上传文件完成解析；
-3. 复制解析后的文本至 *自己账本* 或Beancount-Trans-Assets项目（提供基础的目录结构）对应的年月目录中；
+1. 从支付宝、微信中获取账单
+2. 在https://trans.dhr2333.cn/trans 首页中上传csv文件完成解析
+3. 复制解析后的文本至 *自己账本* 或Beancount-Trans-Assets项目（提供基础的目录结构）对应的年月目录中
 4. 修改文本中的Expense:Other和Assets:Other的条目（未解析成功）
-5. 在Beancount-Trans-Assets项目中使用`fava main.bean`运行程序，通过http://127.0.0.1:5000访问；
-6. 根据fava提示修改错误条目；
+5. 在Beancount-Trans-Assets项目中使用`fava main.bean`运行程序，通过http://127.0.0.1:5000 访问
+6. 根据fava提示修改错误条目
 
 ![Fava 日记账](https://daihaorui.oss-cn-hangzhou.aliyuncs.com/djangoblog/202310101706811.png)
 
@@ -33,6 +33,36 @@
 ## 使用说明
 
 该项目默认读者有beancount的使用经验。在使用Beancount-Trans过程中，有以下几点需要注意
+
+### 默认忽略
+
+默认会对余额宝账户的收益进行忽略，推荐在下个月balance时以"Income:Investment:Interest"利息计入。
+
+默认会对微信支付状态为"已全额退款"、 "对方已退还"或以"已退款"开头的条目进行忽略。
+
+默认会对支付宝支付状态为"退款成功"、"交易关闭"、"解冻成功"、"信用服务使用成功"、"已关闭"的条目进行忽略。
+
+### 手动处理
+
+最终解析结果为"Expenses:Other"、"Income:Other"、"Assets:Other"时，说明无法正确解析，请手动处理或增加映射后再次解析。
+
+当某个银行含有多张储蓄卡时，可能导致无法解析需手动处理。
+
+### 三餐判断
+
+服务对三餐的判断有两种形式，一种是根据Expense中的支出映射来决定最终的条目，例如账单中含有"早餐"的备注会被匹配到"Expenses:Food:Breakfast"。
+
+还有一种是后端的硬编码，系统在根据支出映射解析完成后得到的条目为"Expenses:Food"时，会根据账单时间对条目进行调整，例如发生在06:00到10:00之间的"Expenses:Food"条目，系统会自动修改为"Expenses:Food:BreakFast"。
+
+	早餐时间：06:00~10:00
+	午餐时间：10:00~14:00
+	晚餐时间：16:00~20:00
+
+当支出映射与三餐时间冲突时，例如在`2023-11-26 10:49:54,扫二维码付款,瑞安市暖爸副食品店,"收款方备注:二维码收款付款方留言:饮料",支出,¥3.00,零钱通,已转账,100004990123112600060327753584678844	,10000499012023112601373972597516	,"/"`条目中
+
+包含"饮料"和"食品"两个关键字，其中"饮料"的Expense为"Expenses:Food:DrinkFruit"，"食品"的Expense为"Expenses:Food"。虽然根据三餐判断时间为早餐"Expenses:Food:Breakfast"与"Expenses:Food:DrinkFruit"优先级一致，但实际情况归类于早餐并不合适。
+
+所以关键字与三餐的判断规则为：先判断关键字优先级，再判断三餐时间。
 
 ### 解析优先级
 
@@ -45,33 +75,28 @@
 
  最终对应"华为"的优先级为100,"华为终端"的优先级为250,"华为软件"的优先级为150，用户需要根据优先级计算规则定义合适的"映射账户"和"商家"。
 
-## 项目开发
+## 项目初始化
 
-可以使用Beancount-Trans目录作为项目的根目录
-
-```
-[daihaorui@localhost Beancount-Trans]$ tree -L 1
-.
-├── Beancount-Trans-Assets  # https://github.com/dhr2333/Beancount-Trans-Assets.git
-├── Beancount-Trans-Backend  # https://github.com/dhr2333/Beancount-Trans-Backend.git
-└── Beancount-Trans-Frontend  # https://github.com/dhr2333/Beancount-Trans-Frontend.git
+```shell
+git clone https://github.com/dhr2333/Beancount-Trans.git
+cd Beancount-Trans; git submodule update --init  # 初始化所有子模块
+git submodule foreach git switch main  # 所有子模块切换到main分支
+git submodule foreach git pull origin main  # 所有子模块拉取mainh分支代码
 ```
 
 # Beancount-Trans-Assets
 
-项目拉取
+Beancount-Trans-Assets项目提供 **Beancount账本组织结构**，所有记账条目以月进行统计，以年进行存档。
+账本结构说明可参考 [Beancount_05_项目管理](https://www.dhr2333.cn/article/2022/9/10/55.html)。
 
-```
+Github私有项目创建成功后，可将代码上传至私有仓库
+
+```shell
 git clone https://github.com/dhr2333/Beancount-Trans-Assets.git
 cd Beancount-Trans-Assets
 # 修改后
 git add .
 git commit -m "提交记录"
-```
-
-Github私有项目创建成功后，可查看项目首页，将代码上传至私有仓库
-
-```
 git remote add origin [你的项目链接]
 git branch -M main
 git push -u origin main
@@ -131,9 +156,9 @@ mysql -h127.0.0.1 -uroot -proot  beancount-trans < translate_expense_map.sql  # 
 
 ## 开始运行
 
-执行： `python manage.py runserver`
+执行： `python manage.py runserver 0:8002`
 
-浏览器打开 http://127.0.0.1:8000/translate/trans 就可以完成初步的账单转换功能。
+浏览器打开 http://127.0.0.1:8002/translate/trans 就可以完成初步的账单解析功能。
 
 # Beancount-Trans-Frontend
 
@@ -141,6 +166,8 @@ mysql -h127.0.0.1 -uroot -proot  beancount-trans < translate_expense_map.sql  # 
 $ npm install 
 $ npm run dev  # 启动程序
 ```
+
+浏览器打开 http://127.0.0.1:5173 ，需要Beancount-Trans-Backend服务正常运行才能实现解析功能。
 
 # 容器部署
 
@@ -178,3 +205,37 @@ $ docker-compose up -d
 ## 访问
 
 通过http://127.0.0.1:38001/trans 进行解析，同时可以通过"我的账本"直接访问完整账本信息。
+
+## Docker-Compose案例文件
+
+```
+version: "3"
+
+services:
+  beancount-trans-frontend:
+    image: registry.cn-hangzhou.aliyuncs.com/dhr2333/beancount-trans-frontend:20231109
+    container_name: beancount-trans-frontend
+    restart: always
+    ports:
+      - "38001:80"
+    volumes:
+      - ./collectstatic:/code/beancount-trans/collectstatic
+  beancount-trans-backend:
+    tty: true
+    image: registry.cn-hangzhou.aliyuncs.com/dhr2333/beancount-trans-backend:20231109
+    container_name: beancount-trans-backend
+    restart: always
+    command: bash -c 'sh /code/beancount-trans/bin/docker_start.sh'
+    volumes:
+      - ./Beancount-Trans-Assets:/code/Beancount-Trans-Assets
+      - ./collectstatic:/code/beancount-trans/collectstatic
+    environment:
+      - DJANGO_DEBUG=False
+      - TRANS_MYSQL_DATABASE=beancount-trans
+      - TRANS_MYSQL_USER=root
+      - TRANS_MYSQL_PASSWORD=xxx
+      - TRANS_MYSQL_HOST=xxx
+      - TRANS_MYSQL_PORT=xxx
+      - TRANS_REDIS_URL=redis://xxx:xxx/
+      - TRANS_REDIS_PASSWORD=xxx
+```
