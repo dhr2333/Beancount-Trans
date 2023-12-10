@@ -5,7 +5,7 @@
 2. 我是以周为频率进行记账断言的，对于长期记账来说这个频率未免太频繁；
 3. 支出账户没有形成系统的规划，导致记录条目时总是要纠结选用哪个支出账户，且记录后也无法通过FAVA的试算表了解自己的各类支出情况；
 
-针对以上记账痛点，开发出Beancount-**Trans用于账单的自动解析**。
+针对以上记账痛点，开发出Beancount-Trans用于**账单的自动解析**。
 
 **上传账单，系统会根据定义好的商户和账户自动格式化输出为beancount能识别的文本**。当前已支持自动更新至Beancount-Trans-Assets项目，仅支持本地部署用户启用。
 
@@ -13,7 +13,7 @@
 
 > 项目链接：https://trans.dhr2333.cn/ 
 
-无登录解析时会使用通用映射模板。本项目提供测试账单，用户自己的微信及支付宝账单自行百度获取。
+无登录解析时会使用通用映射模板。本项目提供测试账单，参考[此文章](https://blog.triplez.cn/posts/bills-export-methods/#%e6%94%af%e4%bb%98%e5%ae%9d)获取支付宝账单，参考[此文章](https://blog.triplez.cn/posts/bills-export-methods/#%e5%be%ae%e4%bf%a1%e6%94%af%e4%bb%98)获取微信账单。
 
 ![Beancount-Trans 首页](https://daihaorui.oss-cn-hangzhou.aliyuncs.com/djangoblog/202310101642806.png)
 
@@ -75,14 +75,61 @@
 
  最终对应"华为"的优先级为100,"华为终端"的优先级为250,"华为软件"的优先级为150，用户需要根据优先级计算规则定义合适的"映射账户"和"商家"。
 
-## 项目初始化
+## 快速开始（本地容器环境部署）
+
+为了方便用户使用，作者提供本地docker-compose的部署方式，但容器镜像需要用户手动打包生成。**推荐以该方式部署，集成了Fava展示、自动记录等多项自动化功能**。
+
+若无Docker环境，可参考[本地环境部署](#Beancount-Trans-Backend)文档。
+
+### 项目初始化
 
 ```shell
 git clone https://github.com/dhr2333/Beancount-Trans.git
 cd Beancount-Trans; git submodule update --init  # 初始化所有子模块
-git submodule foreach git switch main  # 所有子模块切换到main分支
-git submodule foreach git pull origin main  # 所有子模块拉取mainh分支代码
+# git submodule foreach git switch main  # 所有子模块切换到main分支
+# git submodule foreach git pull origin main  # 若有需要则将所有子模块拉取main分支代码
 ```
+
+### 镜像打包
+
+Beancount-Trans-Backend目录中需要生成beancount-trans-mysql数据库镜像和beancount-trans-backend后端镜像
+
+Beancount-Trans-Frontend目录中需要生成beancount-trans-frontend前端镜像
+
+```
+$ cd Beancount-Trans-Backend
+docker build -f Dockerfile-Mysql -t harbor.dhr2333.cn:8080/library/beancount-trans-mysql:latest .
+docker build -f Dockerfile-Backend -t harbor.dhr2333.cn:8080/library/beancount-trans-backend:latest .
+
+$ cd Beancount-Trans-Frontend
+npm install && npm run build && docker build -t harbor.dhr2333.cn:8080/library/beancount-trans-frontend:latest .  # 安装所需的包和依赖项，构建项目，生成镜像
+```
+
+### 首次运行
+
+首次运行需要修改docker-compose中的volumes配置，自动生成存储卷，之后数据会持久化存储。mysql默认使用初始化数据，并不做持久化存储。
+
+```
+volumes:
+  # mysql:
+  #   external: true # 第一次启动mysql时将该行注释，用于创建存储卷
+  #   name: mysql-data
+  redis:
+    external: true # 第一次启动mysql时将该行注释，用于创建存储卷
+    name: redis-data
+```
+
+在Benacount-Trans主目录下启动
+
+```
+$ docker-compose up -d
+```
+
+### 访问
+
+通过http://127.0.0.1:38001/trans 进行解析，同时可以通过"我的账本"直接访问完整账本信息。
+
+![Pasted image 20231210165239](https://daihaorui.oss-cn-hangzhou.aliyuncs.com/djangoblog/202312101703363.png)
 
 # Beancount-Trans-Assets
 
@@ -109,6 +156,7 @@ Beancount-Trans项目集中的后端项目，主要实现账单格式的转换�
 ## 安装
 
 ```shell
+$ cd Beancount-Trans-Backend
 $ pip install pipenv  #  使用虚拟环境
 $ pipenv shell
 $ pip install -r requirements.txt  # 安装所需依赖
@@ -150,8 +198,7 @@ python manage.py migrate
 导入提供的SQL模板，并根据自己的实际账户进行调整：
 
 ```
-mysql -h127.0.0.1 -uroot -proot  beancount-trans < translate_assets_map.sql  # 资产账户，模板只提供微信支付宝的账单解析，银行卡及信用卡需手动添加
-mysql -h127.0.0.1 -uroot -proot  beancount-trans < translate_expense_map.sql  # 支出账户，当前模板含有强烈的个人风格，建议根据自己情况修改
+mysql -h127.0.0.1 -uroot -proot  beancount-trans < 20231209-Develop.sql  # 当前模板含有强烈的个人风格，建议根据自己情况修改
 ```
 
 ## 开始运行
@@ -159,83 +206,3 @@ mysql -h127.0.0.1 -uroot -proot  beancount-trans < translate_expense_map.sql  # 
 执行： `python manage.py runserver 0:8002`
 
 浏览器打开 http://127.0.0.1:8002/translate/trans 就可以完成初步的账单解析功能。
-
-# Beancount-Trans-Frontend
-
-```shell
-$ npm install 
-$ npm run dev  # 启动程序
-```
-
-浏览器打开 http://127.0.0.1:5173 ，需要Beancount-Trans-Backend服务正常运行才能实现解析功能。
-
-# 容器部署
-
-为了方便用户使用，作者提供了docker-compose的部署方式，但镜像的生成还需用户手动打包。
-
-## 镜像打包
-
-对于python依赖自行处理，不提供处理方法。
-
-```
-cd Beancount-Trans-Backend && docker build -t harbor.dhr2333.cn:8080/library/beancount-trans-backend:latest .
-cd Beancount-Trans-Frontend && npm run build  && docker build -t harbor.dhr2333.cn:8080/library/beancount-trans-frontend:latest .
-```
-
-## 首次运行
-
-首次运行需要修改docker-compose中的volumes配置，会自动生成存储卷，之后数据会持久化存储。
-
-```
-volumes:
-  mysql:
-    external: true # 第一次启动mysql时将该行注释，用于创建存储卷
-    name: mysql-data
-  redis:
-    external: true # 第一次启动mysql时将该行注释，用于创建存储卷
-    name: redis-data
-```
-
-直接docker-composeo启动
-
-```
-$ docker-compose up -d
-```
-
-## 访问
-
-通过http://127.0.0.1:38001/trans 进行解析，同时可以通过"我的账本"直接访问完整账本信息。
-
-## Docker-Compose案例文件
-
-```
-version: "3"
-
-services:
-  beancount-trans-frontend:
-    image: registry.cn-hangzhou.aliyuncs.com/dhr2333/beancount-trans-frontend:20231109
-    container_name: beancount-trans-frontend
-    restart: always
-    ports:
-      - "38001:80"
-    volumes:
-      - ./collectstatic:/code/beancount-trans/collectstatic
-  beancount-trans-backend:
-    tty: true
-    image: registry.cn-hangzhou.aliyuncs.com/dhr2333/beancount-trans-backend:20231109
-    container_name: beancount-trans-backend
-    restart: always
-    command: bash -c 'sh /code/beancount-trans/bin/docker_start.sh'
-    volumes:
-      - ./Beancount-Trans-Assets:/code/Beancount-Trans-Assets
-      - ./collectstatic:/code/beancount-trans/collectstatic
-    environment:
-      - DJANGO_DEBUG=False
-      - TRANS_MYSQL_DATABASE=beancount-trans
-      - TRANS_MYSQL_USER=root
-      - TRANS_MYSQL_PASSWORD=xxx
-      - TRANS_MYSQL_HOST=xxx
-      - TRANS_MYSQL_PORT=xxx
-      - TRANS_REDIS_URL=redis://xxx:xxx/
-      - TRANS_REDIS_PASSWORD=xxx
-```

@@ -9,31 +9,33 @@ services:
       - "38001:80"
     volumes:
       - ./collectstatic:/code/beancount-trans/collectstatic
+    depends_on:
+      - beancount-trans-backend
   beancount-trans-backend:
     tty: true
     image: harbor.dhr2333.cn:8080/library/beancount-trans-backend:latest
     container_name: beancount-trans-backend
     restart: always
     command: bash -c 'sh /code/beancount-trans/bin/docker_start.sh'
-    # ports:
-    #   - "38000:8000"
+    ports:
+      - "38000:8000"
     volumes:
       - ./Beancount-Trans-Assets:/code/Beancount-Trans-Assets
       - ./collectstatic:/code/beancount-trans/collectstatic
     environment:
-      - DJANGO_DEBUG=False
       - TRANS_MYSQL_DATABASE=beancount-trans
       - TRANS_MYSQL_USER=root
       - TRANS_MYSQL_PASSWORD=root
       - TRANS_MYSQL_HOST=beancount-trans-mysql
       - TRANS_MYSQL_PORT=3306
       - TRANS_REDIS_URL=redis://beancount-trans-redis:6379/
-      - TRANS_REDIS_PASSWORD=lCs6UMzirdFOuUEj8tIP
+      - TRANS_REDIS_PASSWORD=root
     depends_on:
       - beancount-trans-mysql
       - beancount-trans-redis
   beancount-trans-mysql:
-    image: harbor.dhr2333.cn:8080/library/mysql:8.0.26
+    image: harbor.dhr2333.cn:8080/library/beancount-trans-mysql:latest
+    # image: harbor.dhr2333.cn:8080/library/mysql:8.0.26
     container_name: beancount-trans-mysql
     restart: always
     environment:
@@ -42,7 +44,7 @@ services:
     ports:
       - "3306:3306"
     volumes:
-      - mysql:/var/lib/mysql
+      # - mysql:/var/lib/mysql  # 若需要持久存储取消该注释和volumes中的注释
       - ./conf/my.cnf:/etc/mysql/my.cnf
     command: --max_connections=1000
       --character-set-server=utf8mb4
@@ -59,7 +61,6 @@ services:
       - redis:/data
     command: redis-server /etc/redis/redis.conf --appendonly yes
   beancount-trans-assets:
-    # image: harbor.dhr2333.cn:8080/library/beancount:latest
     image: yegle/fava:latest
     container_name: beancount-trans-assets
     restart: always
@@ -70,9 +71,9 @@ services:
     environment:
       - BEANCOUNT_FILE=/Assets/main.bean
 volumes:
-  mysql:
-    external: true # 第一次启动mysql时将该行注释，用于创建存储卷
-    name: mysql-data
+  # mysql:
+  #   external: true # 第一次启动mysql时将该行注释，用于创建存储卷
+  #   name: mysql-data
   redis:
     external: true # 第一次启动mysql时将该行注释，用于创建存储卷
     name: redis-data
