@@ -157,8 +157,8 @@ Beancount-Trans项目集中的后端项目，主要实现账单格式的转换�
 
 ```shell
 $ cd Beancount-Trans-Backend
-$ pip install pipenv  #  使用虚拟环境
-$ pipenv shell
+$ pipenv install  #  安装虚拟环境
+$ pipenv shell  # 使用虚拟环境
 $ pip install -r requirements.txt  # 安装所需依赖
 ```
 
@@ -206,3 +206,12 @@ mysql -h127.0.0.1 -uroot -proot  beancount-trans < 20231209-Develop.sql  # 当�
 执行： `python manage.py runserver 0:8002`
 
 浏览器打开 http://127.0.0.1:8002/translate/trans 就可以完成初步的账单解析功能。
+
+# Beancount-Trans-Frontend
+
+```shell
+$ npm install 
+$ npm run dev  # 启动程序
+```
+
+浏览器打开 http://localhost:5173/ ，需要Beancount-Trans-Backend及数据库服务正常运行才能实现解析功能。
