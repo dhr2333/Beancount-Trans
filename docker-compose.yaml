@@ -2,7 +2,11 @@ version: "3"
 
 services:
   beancount-trans-frontend:
-    image: harbor.dhr2333.cn:8080/library/beancount-trans-frontend:latest
+    build:
+      context: ./Beancount-Trans-Frontend
+      dockerfile: Dockerfile
+      args:
+        - "--no-cache"
     container_name: beancount-trans-frontend
     restart: always
     ports:
@@ -13,12 +17,16 @@ services:
       - beancount-trans-backend
   beancount-trans-backend:
     tty: true
-    image: harbor.dhr2333.cn:8080/library/beancount-trans-backend:latest
+    build:
+      context: ./Beancount-Trans-Backend
+      dockerfile: Dockerfile-Backend
+      args:
+        - "--no-cache"
     container_name: beancount-trans-backend
     restart: always
     command: bash -c 'sh /code/beancount-trans/bin/docker_start.sh'
-    ports:
-      - "38000:8000"
+    # ports:
+    #   - "38000:8000"
     volumes:
       - ./Beancount-Trans-Assets:/code/Beancount-Trans-Assets
       - ./collectstatic:/code/beancount-trans/collectstatic
@@ -34,8 +42,11 @@ services:
       - beancount-trans-mysql
       - beancount-trans-redis
   beancount-trans-mysql:
-    image: harbor.dhr2333.cn:8080/library/beancount-trans-mysql:latest
-    # image: harbor.dhr2333.cn:8080/library/mysql:8.0.26
+    build:
+      context: ./Beancount-Trans-Backend
+      dockerfile: Dockerfile-Mysql
+      args:
+        - "--no-cache"
     container_name: beancount-trans-mysql
     restart: always
     environment:
@@ -51,7 +62,7 @@ services:
       --collation-server=utf8mb4_general_ci
       --default-authentication-plugin=mysql_native_password
   beancount-trans-redis:
-    image: harbor.dhr2333.cn:8080/library/redis:7.0.4
+    image: redis:7.0.4
     container_name: beancount-trans-redis
     restart: always
     ports:
@@ -71,9 +82,9 @@ services:
     environment:
       - BEANCOUNT_FILE=/Assets/main.bean
 volumes:
-  # mysql:
-  #   external: true # 第一次启动mysql时将该行注释，用于创建存储卷
-  #   name: mysql-data
+  mysql:
+    # external: true  # 若已创建外部存储卷，则取消该注释(多次docker compose up可能会导致存储卷重复创建导致启动失败)
+    name: mysql-data
   redis:
-    external: true # 第一次启动mysql时将该行注释，用于创建存储卷
+    # external: true  # 若已创建外部存储卷，则取消该注释
     name: redis-data

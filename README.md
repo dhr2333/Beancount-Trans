@@ -77,7 +77,7 @@
 
 ## 快速开始（本地容器环境部署）
 
-为了方便用户使用，作者提供本地docker-compose的部署方式，但容器镜像需要用户手动打包生成。**推荐以该方式部署，集成了Fava展示、自动记录等多项自动化功能**。
+为了方便用户使用，作者提供本地docker compose的部署方式。**推荐以该方式部署，集成了Fava展示、自动记录等多项自动化功能**。
 
 若无Docker环境，可参考[本地环境部署](#Beancount-Trans-Backend)文档。
 
@@ -90,39 +90,14 @@ cd Beancount-Trans; git submodule update --init  # 初始化所有子模块
 # git submodule foreach git pull origin main  # 若有需要则将所有子模块拉取main分支代码
 ```
 
-### 镜像打包
-
-Beancount-Trans-Backend目录中需要生成beancount-trans-mysql数据库镜像和beancount-trans-backend后端镜像
-
-Beancount-Trans-Frontend目录中需要生成beancount-trans-frontend前端镜像
-
-```
-$ cd Beancount-Trans-Backend
-docker build -f Dockerfile-Mysql -t harbor.dhr2333.cn:8080/library/beancount-trans-mysql:latest .
-docker build -f Dockerfile-Backend -t harbor.dhr2333.cn:8080/library/beancount-trans-backend:latest .
-
-$ cd Beancount-Trans-Frontend
-npm install && npm run build && docker build -t harbor.dhr2333.cn:8080/library/beancount-trans-frontend:latest .  # 安装所需的包和依赖项，构建项目，生成镜像
-```
-
 ### 首次运行
 
-首次运行需要修改docker-compose中的volumes配置，自动生成存储卷，之后数据会持久化存储。mysql默认使用初始化数据，并不做持久化存储。
-
-```
-volumes:
-  # mysql:
-  #   external: true # 第一次启动mysql时将该行注释，用于创建存储卷
-  #   name: mysql-data
-  redis:
-    external: true # 第一次启动mysql时将该行注释，用于创建存储卷
-    name: redis-data
-```
+首次运行会自动创建名为'mysql-data'和'redis-data'的存储卷并打包生成镜像部署。
 
 在Benacount-Trans主目录下启动
 
 ```
-$ docker-compose up -d
+$ docker compose up -d
 ```
 
 ### 访问
@@ -130,6 +105,23 @@ $ docker-compose up -d
 通过http://127.0.0.1:38001/trans 进行解析，同时可以通过"我的账本"直接访问完整账本信息。
 
 ![Pasted image 20231210165239](https://daihaorui.oss-cn-hangzhou.aliyuncs.com/djangoblog/202312101703363.png)
+
+### 持久化存储
+
+mysql默认使用初始化数据，并不做持久化存储。若需要持久化存储需要放开以下注释：
+
+```
+beancount-trans-mysql:
+	volumes:
+      - mysql:/var/lib/mysql  # 若需要持久存储取消该注释和volumes中的注释
+volumes:
+  mysql:
+    external: true  # 若已创建外部存储卷，则取消该注释(多次docker compose up可能会导致存储卷重复创建导致启动失败)
+    name: mysql-data
+  redis:
+    external: true  # 若已创建外部存储卷，则取消该注释
+    name: redis-data
+```
 
 # Beancount-Trans-Assets
 
