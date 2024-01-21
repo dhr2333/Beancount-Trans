@@ -13,14 +13,18 @@
 
 > 项目链接：https://trans.dhr2333.cn/ 
 
-无登录解析时会使用通用映射模板。本项目提供测试账单，参考[此文章](https://blog.triplez.cn/posts/bills-export-methods/#%e6%94%af%e4%bb%98%e5%ae%9d)获取支付宝账单，参考[此文章](https://blog.triplez.cn/posts/bills-export-methods/#%e5%be%ae%e4%bf%a1%e6%94%af%e4%bb%98)获取微信账单。
+无登录解析时会使用通用映射模板。
+
+本项目提供测试账单，参考[此文章](https://blog.triplez.cn/posts/bills-export-methods/#%e6%94%af%e4%bb%98%e5%ae%9d)获取支付宝账单；参考[此文章](https://blog.triplez.cn/posts/bills-export-methods/#%e5%be%ae%e4%bf%a1%e6%94%af%e4%bb%98)获取微信账单；
+
+获取招商银行信用卡账单，通过"掌上生活"APP->查账->账单补寄(补寄方式为「电邮发送」)->申请补寄。
 
 ![Beancount-Trans 首页](https://daihaorui.oss-cn-hangzhou.aliyuncs.com/djangoblog/202310101642806.png)
 
 ## 使用步骤
 
-1. 从支付宝、微信中获取账单
-2. 在https://trans.dhr2333.cn/trans 首页中上传csv文件完成解析
+1. 从支付宝、微信、招商银行信用卡(已自动忽略支付宝及微信账单条目)中获取账单
+2. 在https://trans.dhr2333.cn/trans 首页中上传csv或pdf文件完成解析
 3. 复制解析后的文本至 *自己账本* 或Beancount-Trans-Assets项目（提供基础的目录结构）对应的年月目录中
 4. 修改文本中的Expense:Other和Assets:Other的条目（未解析成功）
 5. 在Beancount-Trans-Assets项目中使用`fava main.bean`运行程序，通过http://127.0.0.1:5000 访问
@@ -97,7 +101,8 @@ cd Beancount-Trans; git submodule update --init  # 初始化所有子模块
 在Benacount-Trans主目录下启动
 
 ```
-$ docker compose up -d
+$ docker compose build  # 编译
+$ docker compose up -d  # 运行
 ```
 
 ### 访问
