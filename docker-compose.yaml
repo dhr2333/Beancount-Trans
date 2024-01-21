@@ -2,6 +2,7 @@ version: "3"
 
 services:
   beancount-trans-frontend:
+    # image: registry.cn-hangzhou.aliyuncs.com/dhr2333/beancount-trans-frontend:20240120
     build:
       context: ./Beancount-Trans-Frontend
       dockerfile: Dockerfile
@@ -17,6 +18,7 @@ services:
       - beancount-trans-backend
   beancount-trans-backend:
     tty: true
+    # image: registry.cn-hangzhou.aliyuncs.com/dhr2333/beancount-trans-backend:20240120
     build:
       context: ./Beancount-Trans-Backend
       dockerfile: Dockerfile-Backend
@@ -42,6 +44,7 @@ services:
       - beancount-trans-mysql
       - beancount-trans-redis
   beancount-trans-mysql:
+    # image: registry.cn-hangzhou.aliyuncs.com/dhr2333/beancount-trans-mysql:20240120
     build:
       context: ./Beancount-Trans-Backend
       dockerfile: Dockerfile-Mysql
