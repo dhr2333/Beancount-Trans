@@ -1,4 +1,5 @@
 # Beancount-Trans
+
 经过长期对Beancount的使用和测试，我发现在日常记账中最烦恼的有以下几点：
 
 1. 由于记录数量太多，若每个记录都以单独条目记录则需要耗费大量时间，若以天为条目进行记账，又会导致条目的颗粒度太大；
@@ -29,10 +30,9 @@
 4. 修改文本中的Expense:Other和Assets:Other的条目（未解析成功）
 5. 在Beancount-Trans-Assets项目中使用`fava main.bean`运行程序，通过http://127.0.0.1:5000 访问
 6. 根据fava提示修改错误条目
+![](https://daihaorui.oss-cn-hangzhou.aliyuncs.com/djangoblog/202403121150123.png)
 
-![Fava 日记账](https://daihaorui.oss-cn-hangzhou.aliyuncs.com/djangoblog/202310101706811.png)
-
-![Fava 试算表](https://daihaorui.oss-cn-hangzhou.aliyuncs.com/djangoblog/202310101710353.png)
+![](https://daihaorui.oss-cn-hangzhou.aliyuncs.com/djangoblog/202403121150282.png)
 
 ## 使用说明
 
@@ -46,13 +46,13 @@
 
 默认会对支付宝支付状态为"退款成功"、"交易关闭"、"解冻成功"、"信用服务使用成功"、"已关闭"的条目进行忽略。
 
-默认会对招商银行信用卡账单中通过"支付宝"、"微信"支付的条目进行忽略。
-
 ### 手动处理
 
 最终解析结果为"Expenses:Other"、"Income:Other"、"Assets:Other"时，说明无法正确解析，请手动处理或增加映射后再次解析。
 
-当某个银行含有多张储蓄卡时，可能导致无法解析需手动处理。
+当某个银行含有多张储蓄卡时，解析结果可能错误需手动处理。
+
+由于各账单的字段是以 *逗号* 作为分隔，所以无法解析商家名称包含 `,` 的条目。
 
 ### 三餐判断
 
@@ -81,6 +81,10 @@
 
  最终对应"华为"的优先级为100,"华为终端"的优先级为250,"华为软件"的优先级为150，用户需要根据优先级计算规则定义合适的"映射账户"和"商家"。
 
+### 自动写入Beancount-Trans-Assets
+
+当选中"自动写入Beancount-Trans-Assets"后，系统会在解析完成后检查同级目录下Beancount-Trans-Assets是否有对应本年的年度账本，例如`2023`。如果存在，系统会将数据正常写入该账本；如果不存在，系统会自动创建年度账本，并将解析后的文本写入其中。
+
 ## 快速开始（本地容器环境部署）
 
 为了方便用户使用，作者提供本地docker compose的部署方式。**推荐以该方式部署，集成了Fava展示、自动记录等多项自动化功能**。
@@ -102,14 +106,18 @@ cd Beancount-Trans; git submodule update --init  # 初始化所有子模块
 
 在Benacount-Trans主目录下启动
 
-```
+```shell
 $ docker compose build  # 编译
-$ docker compose up -d  # 运行
+$ docker compose up -d  # 后台运行
 ```
+
+![](https://daihaorui.oss-cn-hangzhou.aliyuncs.com/djangoblog/202403120934590.png)
+
+![](https://daihaorui.oss-cn-hangzhou.aliyuncs.com/djangoblog/202403120934209.png)
 
 ### 访问
 
-通过http://127.0.0.1:38001/trans 进行解析，同时可以通过"我的账本"直接访问完整账本信息。
+通过 http://127.0.0.1:38001/trans 进行解析，同时可以通过"我的账本"直接访问完整账本信息。
 
 ![Pasted image 20231210165239](https://daihaorui.oss-cn-hangzhou.aliyuncs.com/djangoblog/202312101703363.png)
 
@@ -117,10 +125,10 @@ $ docker compose up -d  # 运行
 
 mysql默认使用初始化数据，并不做持久化存储。若需要持久化存储需要放开以下注释：
 
-```
+```yaml
 beancount-trans-mysql:
-	volumes:
-      - mysql:/var/lib/mysql  # 若需要持久存储取消该注释和volumes中的注释
+  volumes:
+    - mysql:/var/lib/mysql  # 若需要持久存储取消该注释和volumes中的注释
 volumes:
   mysql:
     external: true  # 若已创建外部存储卷，则取消该注释(多次docker compose up可能会导致存储卷重复创建导致启动失败)
@@ -183,20 +191,20 @@ DATABASES = {
 
 mysql数据库中执行:
 
-```
+```sql
 CREATE DATABASE `beancount-trans`
 ```
 
 然后终端下执行:
 
-```
+```shell
 python manage.py makemigrations
 python manage.py migrate
 ```
 
 导入提供的SQL模板，并根据自己的实际账户进行调整：
 
-```
+```shell
 mysql -h127.0.0.1 -uroot -proot  beancount-trans < 20231209-Develop.sql  # 当前模板含有强烈的个人风格，建议根据自己情况修改
 ```
 
@@ -204,7 +212,7 @@ mysql -h127.0.0.1 -uroot -proot  beancount-trans < 20231209-Develop.sql  # 当�
 
 执行： `python manage.py runserver 0:8002`
 
-浏览器打开 http://127.0.0.1:8002/translate/trans 就可以完成初步的账单解析功能默认会对余额宝账户的收益进行忽略，推荐在下个月balance时以"Income:Investment:Inte。
+浏览器打开 http://127.0.0.1:8002/translate/trans 就可以完成初步的账单转换。
 
 # Beancount-Trans-Frontend
 
