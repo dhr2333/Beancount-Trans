@@ -8,11 +8,11 @@
 
 针对以上记账痛点，开发出Beancount-Trans用于**账单的自动解析**。
 
-**上传账单，系统会根据定义好的商户和账户自动格式化输出为beancount能识别的文本**。当前已支持自动更新至Beancount-Trans-Assets项目，仅支持本地部署用户启用。
+**上传账单，系统会根据定义好的商户和账户自动格式化输出为beancount能识别的文本**。当前已支持自动更新至[Beancount-Trans-Assets](https://github.com/dhr2333/Beancount-Trans-Assets)项目，仅支持本地部署用户启用。
 
 例如"食物"会归类于Expense:Food账户，匹配到"晚餐"会归类与Expense:Food:Dinner账户，默认会归类于Expense:Other，默认情况可能需要手动进行归类。为了尽可能减少Expense:Other的出现，用户需要维护好自己的支出映射，这样能让自己的记账效率和准确性大大提升。
 
-> 项目链接：https://trans.dhr2333.cn/ 
+> 项目链接：[https://trans.dhr2333.cn/](https://trans.dhr2333.cn/)
 
 无登录解析时会使用通用映射模板。
 
@@ -28,8 +28,9 @@
 2. 在https://trans.dhr2333.cn/trans 首页中上传csv或pdf文件完成解析
 3. 复制解析后的文本至 *自己账本* 或Beancount-Trans-Assets项目（提供基础的目录结构）对应的年月目录中
 4. 修改文本中的Expense:Other和Assets:Other的条目（未解析成功）
-5. 在Beancount-Trans-Assets项目中使用`fava main.bean`运行程序，通过http://127.0.0.1:5000 访问
+5. 在Beancount-Trans-Assets项目中使用`fava main.bean`运行程序，通过 http://127.0.0.1:5000 访问
 6. 根据fava提示修改错误条目
+
 ![](https://daihaorui.oss-cn-hangzhou.aliyuncs.com/djangoblog/202403121150123.png)
 
 ![](https://daihaorui.oss-cn-hangzhou.aliyuncs.com/djangoblog/202403121150282.png)
@@ -108,7 +109,7 @@ cd Beancount-Trans; git submodule update --init  # 初始化所有子模块
 
 ```shell
 $ docker compose build  # 编译
-$ docker compose up -d  # 后台运行
+$ docker compose up  # 增加 -d 参数可实现后台运行
 ```
 
 ![](https://daihaorui.oss-cn-hangzhou.aliyuncs.com/djangoblog/202403120934590.png)
@@ -140,7 +141,7 @@ volumes:
 
 # Beancount-Trans-Assets
 
-Beancount-Trans-Assets项目提供 **Beancount账本组织结构**，所有记账条目以月进行统计，以年进行存档。
+[Beancount-Trans-Assets](https://github.com/dhr2333/Beancount-Trans-Assets)项目提供 **Beancount账本组织结构**，所有记账条目以月进行统计，以年进行存档。
 账本结构说明可参考 [Beancount_05_项目管理](https://www.dhr2333.cn/article/2022/9/10/55.html)。
 
 Github私有项目创建成功后，可将代码上传至私有仓库
@@ -169,7 +170,7 @@ $ pipenv shell  # 使用虚拟环境
 $ pip install -r requirements.txt  # 安装所需依赖
 ```
 
-## 运行
+## 配置
 
 修改`djangoblog/setting.py` 修改数据库配置，如下所示：
 
@@ -185,6 +186,24 @@ DATABASES = {
         'TIME_ZONE': 'Asia/Shanghai',
     }
 }
+```
+
+修改`manage.py` 配置文件使用 *本地开发环境* ：
+
+```python
+def main():  
+    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'mydemo.settings')  # 本地开发环境
+    try:  
+        from django.core.management import execute_from_command_line  
+    except ImportError as exc:  
+        raise ImportError(  
+            "Couldn't import Django. Are you sure it's installed and "  
+            "available on your PYTHONPATH environment variable? Did you "            "forget to activate a virtual environment?"        ) from exc  
+    execute_from_command_line(sys.argv)  
+  
+  
+if __name__ == '__main__':  
+    main()
 ```
 
 ## 创建数据库
@@ -216,9 +235,25 @@ mysql -h127.0.0.1 -uroot -proot  beancount-trans < 20231209-Develop.sql  # 当�
 
 # Beancount-Trans-Frontend
 
+修改`.env`配置文件使用 *本地开发环境* ：
+
+![](https://daihaorui.oss-cn-hangzhou.aliyuncs.com/djangoblog/202403171820731.png)
+
+运行前端程序：
+
 ```shell
 $ npm install 
 $ npm run dev  # 启动程序
 ```
 
 浏览器打开 http://localhost:5173/ ，需要Beancount-Trans-Backend及数据库服务正常运行才能实现解析功能。
+
+# 捐赠 & 讨论
+
+关于Beancount-Trans有任何项目及使用上的问题，建议提issue
+
+## 微信
+
+<div>      
+<img src="https://daihaorui.oss-cn-hangzhou.aliyuncs.com/djangoblog/202403311658448.png" width="150" height="150" />  
+</div>
