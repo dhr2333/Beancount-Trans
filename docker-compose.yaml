@@ -27,8 +27,8 @@ services:
     container_name: beancount-trans-backend
     restart: always
     command: bash -c 'sh /code/beancount-trans/bin/docker_start.sh'
-    ports:
-      - "38000:8000"
+    # ports:
+    #   - "38000:8000"
     volumes:
       - ./Beancount-Trans-Assets:/code/Beancount-Trans-Assets
       - ./collectstatic:/code/beancount-trans/collectstatic
