@@ -27,8 +27,8 @@ services:
     container_name: beancount-trans-backend
     restart: always
     command: bash -c 'sh /code/beancount-trans/bin/docker_start.sh'
-    # ports:
-    #   - "38000:8000"
+    ports:
+      - "38000:8000"
     volumes:
       - ./Beancount-Trans-Assets:/code/Beancount-Trans-Assets
       - ./collectstatic:/code/beancount-trans/collectstatic
@@ -69,7 +69,7 @@ services:
     container_name: beancount-trans-redis
     restart: always
     ports:
-      - "26379:6379"
+      - "6379:6379"
     volumes:
       - ./conf/redis.conf:/etc/redis/redis.conf
       - redis:/data
