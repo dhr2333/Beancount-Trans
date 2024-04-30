@@ -2,12 +2,12 @@ version: "3"
 
 services:
   beancount-trans-frontend:
-    # image: registry.cn-hangzhou.aliyuncs.com/dhr2333/beancount-trans-frontend:20240120
-    build:
-      context: ./Beancount-Trans-Frontend
-      dockerfile: Dockerfile
-      args:
-        - "--no-cache"
+    image: dhr2333/beancount-trans-frontend:latest
+    # build:
+    #   context: ./Beancount-Trans-Frontend
+    #   dockerfile: Dockerfile
+    #   args:
+    #     - "--no-cache"
     container_name: beancount-trans-frontend
     restart: always
     ports:
@@ -18,12 +18,12 @@ services:
       - beancount-trans-backend
   beancount-trans-backend:
     tty: true
-    # image: registry.cn-hangzhou.aliyuncs.com/dhr2333/beancount-trans-backend:20240120
-    build:
-      context: ./Beancount-Trans-Backend
-      dockerfile: Dockerfile-Backend
-      args:
-        - "--no-cache"
+    image: dhr2333/beancount-trans-backend:latest
+    # build:
+    #   context: ./Beancount-Trans-Backend
+    #   dockerfile: Dockerfile-Backend
+    #   args:
+    #     - "--no-cache"
     container_name: beancount-trans-backend
     restart: always
     command: bash -c 'sh /code/beancount-trans/bin/docker_start.sh'
@@ -44,12 +44,12 @@ services:
       - beancount-trans-mysql
       - beancount-trans-redis
   beancount-trans-mysql:
-    # image: registry.cn-hangzhou.aliyuncs.com/dhr2333/beancount-trans-mysql:20240120
-    build:
-      context: ./Beancount-Trans-Backend
-      dockerfile: Dockerfile-Mysql
-      args:
-        - "--no-cache"
+    image: dhr2333/beancount-trans-mysql:8.0.26
+    # build:
+    #   context: ./Beancount-Trans-Backend
+    #   dockerfile: Dockerfile-Mysql
+    #   args:
+    #     - "--no-cache"
     container_name: beancount-trans-mysql
     restart: always
     environment:
@@ -65,7 +65,7 @@ services:
       --collation-server=utf8mb4_general_ci
       --default-authentication-plugin=mysql_native_password
   beancount-trans-redis:
-    image: redis:7.0.4
+    image: dhr2333/beancount-trans-redis:7.0.4
     container_name: beancount-trans-redis
     restart: always
     ports:
@@ -75,7 +75,7 @@ services:
       - redis:/data
     command: redis-server /etc/redis/redis.conf --appendonly yes
   beancount-trans-assets:
-    image: yegle/fava:latest
+    image:  dhr2333/beancount-trans-assets:latest
     container_name: beancount-trans-assets
     restart: always
     ports:

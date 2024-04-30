@@ -57,9 +57,9 @@
 
 还有一种是后端的硬编码，系统在根据支出映射解析完成后得到的条目为"Expenses:Food"时，会根据账单时间对条目进行调整，例如发生在06:00到10:00之间的"Expenses:Food"条目，系统会自动修改为"Expenses:Food:BreakFast"。
 
-	早餐时间：06:00~10:00
-	午餐时间：10:00~14:00
-	晚餐时间：16:00~20:00
+> 早餐时间：06:00~10:00
+> 午餐时间：10:00~14:00
+> 晚餐时间：16:00~20:00
 
 当支出映射与三餐时间冲突时，例如在`2023-11-26 10:49:54,扫二维码付款,瑞安市暖爸副食品店,"收款方备注:二维码收款付款方留言:饮料",支出,¥3.00,零钱通,已转账,100004990123112600060327753584678844	,10000499012023112601373972597516	,"/"`条目中
 
@@ -101,11 +101,25 @@ cd Beancount-Trans; git submodule update --init  # 初始化所有子模块
 
 首次运行会自动创建名为'mysql-data'和'redis-data'的存储卷并打包生成镜像部署。
 
-在Benacount-Trans主目录下启动
+在Benacount-Trans主目录下运行
 
 ```shell
-$ docker compose build  # 编译
 $ docker compose up  # 增加 -d 参数可实现后台运行
+```
+
+或 编译后运行
+
+```shell
+services:
+  beancount-trans-frontend:
+    # image: dhr2333/beancount-trans-frontend:latest
+    build:
+      context: ./Beancount-Trans-Frontend
+      dockerfile: Dockerfile
+      args:
+        - "--no-cache"
+$ docker compose build  # 编译
+$ docker compose up
 ```
 
 ![](https://daihaorui.oss-cn-hangzhou.aliyuncs.com/djangoblog/202403120934590.png)
@@ -114,7 +128,7 @@ $ docker compose up  # 增加 -d 参数可实现后台运行
 
 ### 访问
 
-通过 http://127.0.0.1:38001/trans 进行解析，同时可以通过"我的账本"直接访问完整账本信息。
+通过 http://localhost:38001/trans 进行解析，同时可以通过"我的账本"直接访问完整账本信息。
 
 ![Pasted image 20231210165239](https://daihaorui.oss-cn-hangzhou.aliyuncs.com/djangoblog/202312101703363.png)
 
@@ -138,6 +152,7 @@ volumes:
 # Beancount-Trans-Assets
 
 [Beancount-Trans-Assets](https://github.com/dhr2333/Beancount-Trans-Assets)项目提供 **Beancount账本组织结构**，所有记账条目以月进行统计，以年进行存档。
+
 账本结构说明可参考 [Beancount_05_项目管理](https://www.dhr2333.cn/article/2022/9/10/55.html)。
 
 Github私有项目创建成功后，可将代码上传至私有仓库
