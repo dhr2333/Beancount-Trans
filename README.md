@@ -20,8 +20,8 @@
 
 ## 使用步骤
 
-1. 根据[账单导出及查看方法](https://www.dhr2333.cn/article/2024/4/27/77.html)从对应平台中获取账单
-2. 在https://trans.dhr2333.cn/trans 首页中上传csv或pdf文件完成解析
+1. 根据 [账单导出及查看方法](https://www.dhr2333.cn/article/2024/4/27/77.html) 从对应平台中获取账单
+2. 在 https://trans.dhr2333.cn/trans 首页中上传csv或pdf文件完成解析
 3. 复制解析后的文本至 *自己账本* 或Beancount-Trans-Assets项目（提供基础的目录结构）对应的年月目录中
 4. 修改文本中的Expense:Other和Assets:Other的条目（没有对应的映射条目）
 5. 在Beancount-Trans-Assets项目中使用`fava main.bean`运行程序，通过 http://127.0.0.1:5000 访问
@@ -58,7 +58,9 @@
 还有一种是后端的硬编码，系统在根据支出映射解析完成后得到的条目为"Expenses:Food"时，会根据账单时间对条目进行调整，例如发生在06:00到10:00之间的"Expenses:Food"条目，系统会自动修改为"Expenses:Food:BreakFast"。
 
 > 早餐时间：06:00~10:00
+> 
 > 午餐时间：10:00~14:00
+> 
 > 晚餐时间：16:00~20:00
 
 当支出映射与三餐时间冲突时，例如在`2023-11-26 10:49:54,扫二维码付款,瑞安市暖爸副食品店,"收款方备注:二维码收款付款方留言:饮料",支出,¥3.00,零钱通,已转账,100004990123112600060327753584678844	,10000499012023112601373972597516	,"/"`条目中
@@ -82,9 +84,19 @@
 
 当选中"自动写入Beancount-Trans-Assets"后，系统会在解析完成后检查同级目录下Beancount-Trans-Assets是否有对应本年的年度账本，例如`2023`。如果存在，系统会将数据正常写入该账本；如果不存在，系统会自动创建年度账本，并将解析后的文本写入其中。
 
+### Owntracks轨迹记录
+
+OwnTracks 是一款开源的位置跟踪应用程序，旨在帮助用户实时跟踪自己的位置信息并与他人共享。该应用程序可用于智能手机和其他设备，允许用户在背景中持续记录自己的位置，并将这些位置信息发送到 OwnTracks 服务器或其他支持该应用程序的服务上。
+
+参考 https://www.dhr2333.cn/article/2022/12/16/70.html#owntracks
+
+效果展示：
+
+![](https://daihaorui.oss-cn-hangzhou.aliyuncs.com/djangoblog/202405072027283.png)
+
 ## 快速开始（本地容器环境部署）
 
-为了方便用户使用，作者提供本地docker compose的部署方式。**推荐以该方式部署，集成了Fava展示、自动记录等多项自动化功能**。
+为了方便用户使用，作者提供本地docker compose的部署方式。**推荐以该方式部署，集成了Fava展示、自动记录、Owntracks轨迹记录等多项自动化功能**。
 
 若无Docker环境，可参考[本地环境部署](#Beancount-Trans-Backend)文档。
 
@@ -99,7 +111,7 @@ cd Beancount-Trans; git submodule update --init  # 初始化所有子模块
 
 ### 首次运行
 
-首次运行会自动创建名为'mysql-data'和'redis-data'的存储卷并打包生成镜像部署。
+首次运行会自动创建名为`mysql-data`和`redis-data`的存储卷并打包生成镜像部署。
 
 在Benacount-Trans主目录下运行
 
@@ -183,7 +195,7 @@ $ pip install -r requirements.txt  # 安装所需依赖
 
 ## 配置
 
-修改`djangoblog/setting.py` 修改数据库配置，如下所示：
+修改`mydemo/setting.py` 修改数据库配置，如下所示：
 
 ```
 DATABASES = {
