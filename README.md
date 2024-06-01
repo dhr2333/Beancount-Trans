@@ -43,6 +43,8 @@
 
 默认会对支付宝支付状态为"退款成功"、"交易关闭"、"解冻成功"、"信用服务使用成功"、"已关闭"的条目进行忽略。
 
+选中"生成balance对账信息"时，默认忽略同一天非最晚的记录。
+
 ### 手动处理
 
 最终解析结果为"Expenses:Other"、"Income:Other"、"Assets:Other"时，说明无法正确解析，请手动处理或增加映射后再次解析。
@@ -84,7 +86,7 @@
 
 当选中"自动写入Beancount-Trans-Assets"后，系统会在解析完成后检查同级目录下Beancount-Trans-Assets是否有对应本年的年度账本，例如`2023`。如果存在，系统会将数据正常写入该账本；如果不存在，系统会自动创建年度账本，并将解析后的文本写入其中。
 
-### Owntracks轨迹记录
+### OwnTracks轨迹记录
 
 OwnTracks 是一款开源的位置跟踪应用程序，旨在帮助用户实时跟踪自己的位置信息并与他人共享。该应用程序可用于智能手机和其他设备，允许用户在背景中持续记录自己的位置，并将这些位置信息发送到 OwnTracks 服务器或其他支持该应用程序的服务上。
 
@@ -96,7 +98,7 @@ OwnTracks 是一款开源的位置跟踪应用程序，旨在帮助用户实时�
 
 ## 快速开始（本地容器环境部署）
 
-为了方便用户使用，作者提供本地docker compose的部署方式。**推荐以该方式部署，集成了Fava展示、自动记录、Owntracks轨迹记录等多项自动化功能**。
+为了方便用户使用，作者提供本地docker compose的部署方式。**推荐以该方式部署，集成了fava展示、自动记录、OwnTracks轨迹记录等多项自动化功能**。
 
 若无Docker环境，可参考[本地环境部署](#Beancount-Trans-Backend)文档。
 
@@ -111,7 +113,7 @@ cd Beancount-Trans; git submodule update --init  # 初始化所有子模块
 
 ### 首次运行
 
-首次运行会自动创建名为`mysql-data`和`redis-data`的存储卷并打包生成镜像部署。
+首次运行会自动创建名为`mysql-data`和`redis-data`的存储卷。
 
 在Benacount-Trans主目录下运行
 
@@ -146,7 +148,7 @@ $ docker compose up
 
 ### 持久化存储
 
-mysql默认使用初始化数据，并不做持久化存储。若需要持久化存储需要放开以下注释：
+MySQL默认使用初始化数据，并不做持久化存储。若需要持久化存储需要放开以下注释：
 
 ```yaml
 beancount-trans-mysql:
@@ -167,7 +169,7 @@ volumes:
 
 账本结构说明可参考 [Beancount_05_项目管理](https://www.dhr2333.cn/article/2022/9/10/55.html)。
 
-Github私有项目创建成功后，可将代码上传至私有仓库
+GitHub私有项目创建成功后，可将代码上传至私有仓库
 
 ```shell
 git clone https://github.com/dhr2333/Beancount-Trans-Assets.git
@@ -190,6 +192,7 @@ Beancount-Trans项目集中的后端项目，主要实现账单格式的转换�
 $ cd Beancount-Trans-Backend
 $ pipenv install  #  安装虚拟环境
 $ pipenv shell  # 使用虚拟环境
+$ apt-get install -y mysql libmysqlclient mysql-clients  # requirements.txt中的mysqlclient包依赖于mysql,所以需手动下载
 $ pip install -r requirements.txt  # 安装所需依赖
 ```
 
@@ -211,7 +214,7 @@ DATABASES = {
 }
 ```
 
-修改`manage.py` 配置文件使用 *本地开发环境* ：
+修改`manage.py` 配置文件使用 *本地开发环境*  `mydemo.settings`：
 
 ```python
 def main():  
@@ -231,7 +234,7 @@ if __name__ == '__main__':
 
 ## 创建数据库
 
-mysql数据库中执行:
+MySQL数据库中执行:
 
 ```sql
 CREATE DATABASE `beancount-trans`
@@ -247,14 +250,14 @@ python manage.py migrate
 导入提供的SQL模板，并根据自己的实际账户进行调整：
 
 ```shell
-mysql -h127.0.0.1 -uroot -proot  beancount-trans < 20231209-Develop.sql  # 当前模板含有强烈的个人风格，建议根据自己情况修改
+mysql -h127.0.0.1 -uroot -proot  beancount-trans < fixtures/20240507-Develop.sql  # 当前模板含有强烈的个人风格，建议根据自己情况修改
 ```
 
 ## 开始运行
 
 执行： `python manage.py runserver 0:8002`
 
-浏览器打开 http://127.0.0.1:8002/translate/trans 就可以完成初步的账单转换。
+浏览器打开 http://127.0.0.1:8002/translate/trans 就可以完成简单的账单转换。
 
 # Beancount-Trans-Frontend
 
@@ -273,10 +276,17 @@ $ npm run dev  # 启动程序
 
 # 捐赠 & 讨论
 
-关于Beancount-Trans有任何项目及使用上的问题，建议提issue
+关于Beancount-Trans有任何项目及使用上的问题，建议提issue。
 
-## 微信
+捐赠收入将全部用于提高网站访问速度，并支持公众号"TC听云智能"。
+
+## 微信 & 支付宝
+
+微信支持标签解析，备注可添加后缀`#TEST`
+
+支付宝支持信用卡及花呗支付
 
 <div>      
 <img src="https://daihaorui.oss-cn-hangzhou.aliyuncs.com/djangoblog/202403311658448.png" width="150" height="150" />  
+<img src="https://daihaorui.oss-cn-hangzhou.aliyuncs.com/djangoblog/202405301410904.png" width="150" height="150" />  
 </div>
