@@ -90,7 +90,7 @@
 
 OwnTracks 是一款开源的位置跟踪应用程序，旨在帮助用户实时跟踪自己的位置信息并与他人共享。该应用程序可用于智能手机和其他设备，允许用户在背景中持续记录自己的位置，并将这些位置信息发送到 OwnTracks 服务器或其他支持该应用程序的服务上。
 
-参考 https://www.dhr2333.cn/article/2022/12/16/70.html#owntracks
+参考 https://www.dhr2333.cn/article/2022/12/16/70.html#owntracks ，当前仅支持[本地容器环境部署](#快速开始（本地容器环境部署）)用户访问。
 
 效果展示：
 
@@ -274,11 +274,13 @@ $ npm run dev  # 启动程序
 
 浏览器打开 http://localhost:5173/ ，需要Beancount-Trans-Backend及数据库服务正常运行才能实现解析功能。
 
-# 捐赠 & 讨论
+# 贡献 & 捐赠
 
-关于Beancount-Trans有任何项目及使用上的问题，建议提issue。
+如果你希望对Beancount-Trans-Backend做出贡献，请阅读我们的[贡献指南](https://github.com/dhr2333/Beancount-Trans-Backend?tab=readme-ov-file#%E8%B4%A1%E7%8C%AE%E6%8C%87%E5%8D%97)。
 
-捐赠收入将全部用于提高网站访问速度，并支持公众号"TC听云智能"。
+关于Beancount-Trans及子项目有任何项目及使用上的问题，建议提issue。
+
+捐赠收入将全部用于提高[网站](https://trans.dhr2333.cn/)访问速度，并支持公众号"TC听云智能"。
 
 ## 微信 & 支付宝
 
