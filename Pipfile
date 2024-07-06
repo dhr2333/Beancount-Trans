@@ -6,7 +6,7 @@ name = "pypi"
 [packages]
 asgiref = "==3.8.1"
 async-timeout = "==4.0.3"
-certifi = "==2024.6.2"
+certifi = "==2024.7.4"
 cffi = "==1.16.0"
 chardet = "==5.2.0"
 charset-normalizer = "==3.3.2"
