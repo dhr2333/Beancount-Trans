@@ -75,7 +75,7 @@ services:
       - redis:/data
     command: redis-server /etc/redis/redis.conf --appendonly yes
   beancount-trans-assets:
-    image:  dhr2333/beancount-trans-assets:latest
+    image: dhr2333/beancount-trans-assets:latest
     container_name: beancount-trans-assets
     restart: always
     ports:

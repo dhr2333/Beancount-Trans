@@ -1,0 +1,43 @@
+defaultEntryPoints = ["http"]
+
+[log]
+level = "DEBUG"
+
+[api]
+dashboard = true
+
+[accessLog]
+
+
+[providers]
+providersThrottleDuration = 10
+[providers.file]
+filename = "traefik.toml"
+directory = "/etc/traefik/"
+watch = true
+
+
+[entryPoints]
+[entryPoints.web]
+address = ":10000"
+
+[http.routers]
+
+[http.routers.beancount-trans-backend]
+service = "beancount-trans-backend"
+rule = "PathPrefix(`/accounts`) || PathPrefix(`/_allauth`)"
+entrypoints = ["web"]
+
+
+[http.routers.beancount-trans-frontend]
+service = "beancount-trans-frontend"
+rule = "PathPrefix(`/`)"
+entrypoints = ["web"]
+
+[http.services]
+[http.services.beancount-trans-frontend.loadBalancer]
+[[http.services.beancount-trans-frontend.loadBalancer.servers]]
+url = "http://beancount-trans-frontend:80"
+[http.services.beancount-trans-backend.loadBalancer]
+[[http.services.beancount-trans-backend.loadBalancer.servers]]
+url = "http://beancount-trans-backend:8000"
