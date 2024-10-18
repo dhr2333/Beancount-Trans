@@ -1,14 +1,34 @@
 version: "3"
 
 services:
+  traefik:
+    image: "traefik:v3.1"
+    container_name: "traefik"
+    command:
+      # - "--log.level=DEBUG"
+      - "--api.insecure=true" # Traefik 默认监听端口 8080 上的 API 请求。
+      - "--providers.docker=true" # 启用 Docker 提供程序
+      - "--providers.docker.exposedbydefault=true" # 除非明确告知，否则不要暴露容器
+      - "--entryPoints.web.address=:80" # Traefik 在端口 80 (HTTP) 上监听传入请求
+    ports:
+      - "30080:80"
+      - "38080:8080"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      # - "./conf/traefik.toml:/etc/traefik/traefik.toml"
   beancount-trans-frontend:
-    image: dhr2333/beancount-trans-frontend:latest
+    image: dhr2333/beancount-trans-frontend:20241018
+    # image: dhr2333/beancount-trans-frontend:latest
     # build:
     #   context: ./Beancount-Trans-Frontend
     #   dockerfile: Dockerfile
     #   args:
     #     - "--no-cache"
     container_name: beancount-trans-frontend
+    labels:
+      - "traefik.enable=true" # 明确告知 Traefik 公开此容器
+      - "traefik.http.routers.beancount-trans-frontend.rule=Host(`beancount-trans-frontend.localhost`)" # 服务将响应的域
+      - "traefik.http.routers.beancount-trans-frontend.entrypoints=web" # 仅允许来自名为“web”的预定义入口点的请求
     restart: always
     ports:
       - "38001:80"
@@ -18,20 +38,26 @@ services:
       - beancount-trans-backend
   beancount-trans-backend:
     tty: true
-    image: dhr2333/beancount-trans-backend:latest
+    image: dhr2333/beancount-trans-backend:20241017
+    # image: dhr2333/beancount-trans-backend:latest
     # build:
     #   context: ./Beancount-Trans-Backend
     #   dockerfile: Dockerfile-Backend
     #   args:
     #     - "--no-cache"
     container_name: beancount-trans-backend
+    # labels:
+    #   - "traefik.enable=true" # 明确告知 Traefik 公开此容器
+    #   - "traefik.http.routers.beancount-trans-backend.rule=Host(`beancount-trans-backend.localhost`)" # 服务将响应的域
+    #   - "traefik.http.routers.beancount-trans-backend.entrypoints=web" # 仅允许来自名为“web”的预定义入口点的请求
     restart: always
     command: bash -c 'sh /code/beancount-trans/bin/docker_start.sh'
-    # ports:
-    #   - "38000:8000"
+    ports:
+      - "38000:8000"
     volumes:
       - ./Beancount-Trans-Assets:/code/Beancount-Trans-Assets
       - ./collectstatic:/code/beancount-trans/collectstatic
+      - ./Beancount-Trans-Backend:/code/beancount-trans
     environment:
       - TRANS_MYSQL_DATABASE=beancount-trans
       - TRANS_MYSQL_USER=root
@@ -40,11 +66,13 @@ services:
       - TRANS_MYSQL_PORT=3306
       - TRANS_REDIS_URL=redis://beancount-trans-redis:6379/
       - TRANS_REDIS_PASSWORD=root
+      - DJANGO_DEBUG=False
     depends_on:
       - beancount-trans-mysql
       - beancount-trans-redis
   beancount-trans-mysql:
-    image: dhr2333/beancount-trans-mysql:8.0.26
+    # image: dhr2333/beancount-trans-mysql:9.0.1
+    image: dhr2333/beancount-trans-mysql:9.0.1-20241012
     # build:
     #   context: ./Beancount-Trans-Backend
     #   dockerfile: Dockerfile-Mysql
@@ -57,13 +85,14 @@ services:
       TZ: Asia/Shanghai
     ports:
       - "3306:3306"
-    volumes:
-      # - mysql:/var/lib/mysql  # 若需要持久存储取消该注释和volumes中的注释
-      - ./conf/my.cnf:/etc/mysql/my.cnf
-    command: --max_connections=1000
-      --character-set-server=utf8mb4
-      --collation-server=utf8mb4_general_ci
-      --default-authentication-plugin=mysql_native_password
+    # volumes:
+    # #   # - mysql:/var/lib/mysql  # 若需要持久存储取消该注释和volumes中的注释
+    #   - ./conf/my.cnf:/etc/mysql/my.cnf
+    # command:
+    #   --max_connections=1000
+    #   --character-set-server=utf8mb4
+    #   --collation-server=utf8mb4_general_ci
+    #   --default-authentication-plugin=mysql_native_password
   beancount-trans-redis:
     image: dhr2333/beancount-trans-redis:7.0.4
     container_name: beancount-trans-redis
@@ -75,7 +104,7 @@ services:
       - redis:/data
     command: redis-server /etc/redis/redis.conf --appendonly yes
   beancount-trans-assets:
-    image:  dhr2333/beancount-trans-assets:latest
+    image: dhr2333/beancount-trans-assets:latest
     container_name: beancount-trans-assets
     restart: always
     ports:
