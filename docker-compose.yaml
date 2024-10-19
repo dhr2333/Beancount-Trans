@@ -1,5 +1,3 @@
-version: "3"
-
 services:
   traefik:
     image: "traefik:v3.1"
@@ -34,6 +32,8 @@ services:
       - "38001:80"
     volumes:
       - ./collectstatic:/code/beancount-trans/collectstatic
+    networks:
+      - shared-network
     depends_on:
       - beancount-trans-backend
   beancount-trans-backend:
@@ -52,27 +52,30 @@ services:
     #   - "traefik.http.routers.beancount-trans-backend.entrypoints=web" # 仅允许来自名为“web”的预定义入口点的请求
     restart: always
     command: bash -c 'sh /code/beancount-trans/bin/docker_start.sh'
-    ports:
-      - "38000:8000"
+    # ports:
+    # - "38000:8000"
     volumes:
       - ./Beancount-Trans-Assets:/code/Beancount-Trans-Assets
       - ./collectstatic:/code/beancount-trans/collectstatic
-      - ./Beancount-Trans-Backend:/code/beancount-trans
+      - ./Beancount-Trans-Backend:/code/beancount-trans # 热加载需重新运行uwsgi --ini conf/uwsgi.ini
     environment:
       - TRANS_MYSQL_DATABASE=beancount-trans
+      # - TRANS_MYSQL_HOST=mysql-9.0.1 # 生产本地数据库
+      - TRANS_MYSQL_HOST=beancount-trans-mysql # 初始化数据库
       - TRANS_MYSQL_USER=root
-      - TRANS_MYSQL_PASSWORD=root
-      - TRANS_MYSQL_HOST=beancount-trans-mysql
+      # - TRANS_MYSQL_PASSWORD=x4@JM!Kv5zzPomeQ # 生产本地数据库
+      - TRANS_MYSQL_PASSWORD=root # 初始化数据库
       - TRANS_MYSQL_PORT=3306
       - TRANS_REDIS_URL=redis://beancount-trans-redis:6379/
       - TRANS_REDIS_PASSWORD=root
       - DJANGO_DEBUG=False
+    networks:
+      - shared-network
     depends_on:
       - beancount-trans-mysql
       - beancount-trans-redis
   beancount-trans-mysql:
-    # image: dhr2333/beancount-trans-mysql:9.0.1
-    image: dhr2333/beancount-trans-mysql:9.0.1-20241012
+    image: dhr2333/beancount-trans-mysql:9.0.1-20241018
     # build:
     #   context: ./Beancount-Trans-Backend
     #   dockerfile: Dockerfile-Mysql
@@ -85,9 +88,12 @@ services:
       TZ: Asia/Shanghai
     ports:
       - "3306:3306"
+    networks:
+      - shared-network
     # volumes:
-    # #   # - mysql:/var/lib/mysql  # 若需要持久存储取消该注释和volumes中的注释
-    #   - ./conf/my.cnf:/etc/mysql/my.cnf
+    #     - mysql:/var/lib/mysql # 若需要持久存储取消该注释和volumes中的注释
+    #     - ./conf/my.cnf:/etc/mysql/my.cnf
+    #   - ./Beancount-Trans-Backend/fixtures/20241018-Develop.sql:/docker-entrypoint-initdb.d/Develop.sql # 隐私数据
     # command:
     #   --max_connections=1000
     #   --character-set-server=utf8mb4
@@ -102,6 +108,8 @@ services:
     volumes:
       - ./conf/redis.conf:/etc/redis/redis.conf
       - redis:/data
+    networks:
+      - shared-network
     command: redis-server /etc/redis/redis.conf --appendonly yes
   beancount-trans-assets:
     image: dhr2333/beancount-trans-assets:latest
@@ -113,10 +121,16 @@ services:
       - ./Beancount-Trans-Assets:/Assets
     environment:
       - BEANCOUNT_FILE=/Assets/main.bean
+    networks:
+      - shared-network
 volumes:
   mysql:
-    # external: true  # 若已创建外部存储卷，则取消该注释(多次docker compose up可能会导致存储卷重复创建导致启动失败)
+    external: true # 若已创建外部存储卷，则取消该注释(多次docker compose up可能会导致存储卷重复创建导致启动失败)
     name: mysql-data
   redis:
-    # external: true  # 若已创建外部存储卷，则取消该注释
+    external: true # 若已创建外部存储卷，则取消该注释
     name: redis-data
+
+networks:
+  shared-network:
+    external: true
