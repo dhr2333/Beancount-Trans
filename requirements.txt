@@ -35,6 +35,7 @@ pillow==11.0.0
 pipenv==2024.4.0
 platformdirs==4.3.6
 pluggy==1.5.0
+psycopg2==2.9.10
 pycparser==2.22
 pycryptodome==3.21.0
 PyJWT==2.10.1
