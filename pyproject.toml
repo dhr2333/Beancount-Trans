@@ -1,4 +1,0 @@
-[tool.pytest.ini_options]
-django_find_project = "false"
-testpaths = ["Beancount-Trans-Backend/translate"]
-python_files = ["tests.py", "test_*.py", "*_tests.py"]
