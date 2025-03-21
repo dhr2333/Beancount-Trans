@@ -36,40 +36,31 @@ services:
       - TRANS_MYSQL_DATABASE=beancount-trans
       - TRANS_MYSQL_USER=root
       - TRANS_MYSQL_PASSWORD=root
-      - TRANS_MYSQL_HOST=beancount-trans-mysql
-      - TRANS_MYSQL_PORT=3306
+      - TRANS_MYSQL_HOST=beancount-trans-postgres
+      - TRANS_MYSQL_PORT=5432
       - TRANS_REDIS_URL=redis://beancount-trans-redis:6379/
       - TRANS_REDIS_PASSWORD=root
     depends_on:
-      - beancount-trans-mysql
+      - beancount-trans-postgres
       - beancount-trans-redis
-  beancount-trans-mysql:
-    image: dhr2333/beancount-trans-mysql:8.0.26
-    # build:
-    #   context: ./Beancount-Trans-Backend
-    #   dockerfile: Dockerfile-Mysql
-    #   args:
-    #     - "--no-cache"
-    container_name: beancount-trans-mysql
+  beancount-trans-postgres:
+    image: dhr2333/beancount-trans-postgres:latest
+    container_name: beancount-trans-postgres
     restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: root
-      TZ: Asia/Shanghai
     ports:
-      - "3306:3306"
+      - "35432:5432"
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=root
     volumes:
-      # - mysql:/var/lib/mysql  # 若需要持久存储取消该注释和volumes中的注释
-      - ./conf/my.cnf:/etc/mysql/my.cnf
-    command: --max_connections=1000
-      --character-set-server=utf8mb4
-      --collation-server=utf8mb4_general_ci
-      --default-authentication-plugin=mysql_native_password
+      - "postgres:/var/lib/postgresql/data"
   beancount-trans-redis:
-    image: dhr2333/beancount-trans-redis:7.0.4
+    image: dhr2333/beancount-trans-redis:latest
     container_name: beancount-trans-redis
     restart: always
     ports:
-      - "6379:6379"
+      - "36379:6379"
     volumes:
       - ./conf/redis.conf:/etc/redis/redis.conf
       - redis:/data
@@ -85,9 +76,9 @@ services:
     environment:
       - BEANCOUNT_FILE=/Assets/main.bean
 volumes:
-  mysql:
-    # external: true  # 若已创建外部存储卷，则取消该注释(多次docker compose up可能会导致存储卷重复创建导致启动失败)
-    name: mysql-data
   redis:
-    # external: true  # 若已创建外部存储卷，则取消该注释
+    # external: true # 若已创建外部存储卷，则取消该注释(多次docker compose up可能会导致存储卷重复创建导致启动失败)
     name: redis-data
+  postgres:
+    # external: true # 若已创建外部存储卷，则取消该注释
+    name: postgres-data
