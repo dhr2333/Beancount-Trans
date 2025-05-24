@@ -21,12 +21,12 @@
 2. 在 [首页](https://trans.dhr2333.cn/trans) 上传 csv 或 pdf 文件完成解析（无登录用户默认使用 admin 的通用映射模板）
 3. 复制解析后的文本至 *自己账本* 或 Beancount-Trans-Assets 项目（提供基础的目录结构）对应的年月目录中
 4. 修改文本中的 Expense:Other 和 Assets:Other 的条目（没有对应的映射条目）
-5. 在 Beancount-Trans-Assets 项目中使用 `fava main.bean` 运行程序，通过 http://127.0.0.1:5000 访问
+5. 在 Beancount-Trans-Assets 项目中使用 `fava main.bean` 运行程序，通过 <http://127.0.0.1:5000> 访问
 6. 根据 fava 提示修改错误条目
 
-![](https://daihaorui.oss-cn-hangzhou.aliyuncs.com/djangoblog/202403121150123.png)
+![日记账](https://daihaorui.oss-cn-hangzhou.aliyuncs.com/djangoblog/202403121150123.png)
 
-![](https://daihaorui.oss-cn-hangzhou.aliyuncs.com/djangoblog/202403121150282.png)
+![试算表](https://daihaorui.oss-cn-hangzhou.aliyuncs.com/djangoblog/202403121150282.png)
 
 ## 使用说明
 
@@ -69,7 +69,7 @@ graph TD
 当出现多个条目解析优先级相同时：
 
 ```text
-2024-01-01 08:00:00,保险,国泰**司,fin***@cathay-ins.com.cn,保险-买家版运费险-EGGKA木耳边一体绒打底衫女内搭秋冬2022新款半高领加绒针织上衣等,支出,7.88,中信银行信用卡(5718),交易成功,2023010522001199861407503809	,T1100P1790123557322669684	,,
+2024-01-01 08:00:00,保险,国泰**司,fin***@cathay-ins.com.cn,保险-买家版运费险-EGGKA木耳边一体绒打底衫女内搭秋冬2022新款半高领加绒针织上衣等,支出,7.88,中信银行信用卡(5718),交易成功,2023010522001199861407503809,T1100P1790123557322669684,,
 候选关键字: ["保险", "运费", "打底衫", "上衣"]
 
 • 保险 → Expenses:Finance:Insurance (优先级200)
@@ -77,7 +77,7 @@ graph TD
 • 上衣 → Expenses:Shopping:Clothing (优先级200)
 
 # AI决策过程：
-1. spaCy计算相似度: 
+1. spaCy计算相似度:
    - "保险" → 0.72
    - "打底衫" → 0.64
    - "上衣" → 0.68
@@ -91,11 +91,12 @@ graph TD
 还有一种是后端的硬编码，系统在根据支出映射解析完成后得到的条目为 "Expenses:Food" 时，会根据账单时间对条目进行调整，例如发生在 06:00 到 10:00 之间的 "Expenses:Food" 条目，系统会自动修改为 "Expenses:Food:BreakFast"。
 
 时段配置：
+
 - 🍳 早餐：06:00-10:00
 - 🍱 午餐：10:00-14:00
 - 🍲 晚餐：16:00-20:00
 
-当支出映射与三餐时间冲突时，例如在 `2023-11-26 10:49:54,扫二维码付款,瑞安市暖爸副食品店,"收款方备注:二维码收款付款方留言:饮料",支出,¥3.00,零钱通,已转账,100004990123112600060327753584678844	,10000499012023112601373972597516	,"/"` 条目中
+当支出映射与三餐时间冲突时，例如在 `2023-11-26 10:49:54,扫二维码付款,瑞安市暖爸副食品店,"收款方备注:二维码收款付款方留言:饮料",支出,¥3.00,零钱通,已转账,100004990123112600060327753584678844,10000499012023112601373972597516,"/"` 条目中
 
 包含 " 饮料 " 和 " 食品 " 两个关键字，其中 " 饮料 " 的 Expense 为 "Expenses:Food:DrinkFruit"，" 食品 " 的 Expense 为 "Expenses:Food"。虽然根据三餐判断时间为早餐 "Expenses:Food:Breakfast" 与 "Expenses:Food:DrinkFruit" 优先级一致，但实际情况归类于早餐并不合适。
 
@@ -131,7 +132,7 @@ graph TD
 
 为了方便用户使用，作者提供本地 docker compose 的部署方式。**推荐以该方式部署，集成了 fava 展示、自动记录、OwnTracks 轨迹记录等多项自动化功能**。
 
-若无 Docker 环境，可参考 [本地环境部署](#Beancount-Trans-Backend) 文档。
+若无 Docker 环境，可参考 [本地环境部署](#beancount-trans-backend) 文档。
 
 ### 项目初始化
 
@@ -151,7 +152,7 @@ cd Beancount-Trans; git submodule update --init  # 初始化所有子模块
 在 Benacount-Trans 主目录下运行
 
 ```shell
-$ docker compose up  # 增加 -d 参数可实现后台运行
+docker compose up  # 增加 -d 参数可实现后台运行
 ```
 
 或 编译后运行
@@ -169,13 +170,13 @@ $ docker compose build  # 编译
 $ docker compose up
 ```
 
-![](https://daihaorui.oss-cn-hangzhou.aliyuncs.com/djangoblog/202403120934590.png)
+![docker compose编译启动_1](https://daihaorui.oss-cn-hangzhou.aliyuncs.com/djangoblog/202403120934590.png)
 
-![](https://daihaorui.oss-cn-hangzhou.aliyuncs.com/djangoblog/202403120934209.png)
+![docker compose编译启动_2](https://daihaorui.oss-cn-hangzhou.aliyuncs.com/djangoblog/202403120934209.png)
 
 ### 访问
 
-通过 http://localhost:38001/trans 进行解析，同时可以通过 " 我的账本 " 直接访问完整账本信息。
+通过 <http://localhost:38001/trans> 进行解析，同时可以通过 " 我的账本 " 直接访问完整账本信息。
 
 ![Pasted image 20231210165239](https://daihaorui.oss-cn-hangzhou.aliyuncs.com/djangoblog/202312101703363.png)
 
@@ -196,7 +197,7 @@ volumes:
     name: redis-data
 ```
 
-# Beancount-Trans-Assets
+## Beancount-Trans-Assets
 
 [Beancount-Trans-Assets](https://github.com/dhr2333/Beancount-Trans-Assets) 项目提供 **Beancount 账本组织结构**，所有记账条目以月进行统计，以年进行存档。
 
@@ -215,25 +216,25 @@ git branch -M main
 git push -u origin main
 ```
 
-# Beancount-Trans-Backend
+## Beancount-Trans-Backend
 
 Beancount-Trans 项目集中的后端项目，主要实现账单格式的转换功能及提供对外接口。
 
-## 安装
+### 安装
 
 ```shell
-$ cd Beancount-Trans-Backend
-$ pipenv install  #  安装虚拟环境
-$ pipenv shell  # 使用虚拟环境
-$ apt-get install -y mysql libmysqlclient mysql-clients  # requirements.txt中的mysqlclient包依赖于mysql,所以需手动下载
-$ pip install -r requirements.txt  # 安装所需依赖
+cd Beancount-Trans-Backend
+pipenv install  #  安装虚拟环境
+pipenv shell  # 使用虚拟环境
+apt-get install -y mysql libmysqlclient mysql-clients  # requirements.txt中的mysqlclient包依赖于mysql,所以需手动下载
+pip install -r requirements.txt  # 安装所需依赖
 ```
 
-## 配置
+### 配置
 
 修改 `mydemo/setting.py` 修改数据库配置，如下所示：
 
-```
+```python
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
@@ -250,22 +251,22 @@ DATABASES = {
 修改 `manage.py` 配置文件使用 *本地开发环境* `mydemo.settings`：
 
 ```python
-def main():  
+def main():
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'mydemo.settings')  # 本地开发环境
-    try:  
-        from django.core.management import execute_from_command_line  
-    except ImportError as exc:  
-        raise ImportError(  
-            "Couldn't import Django. Are you sure it's installed and "  
-            "available on your PYTHONPATH environment variable? Did you "            "forget to activate a virtual environment?"        ) from exc  
-    execute_from_command_line(sys.argv)  
-  
-  
-if __name__ == '__main__':  
+    try:
+        from django.core.management import execute_from_command_line
+    except ImportError as exc:
+        raise ImportError(
+            "Couldn't import Django. Are you sure it's installed and "
+            "available on your PYTHONPATH environment variable? Did you "            "forget to activate a virtual environment?"        ) from exc
+    execute_from_command_line(sys.argv)
+
+
+if __name__ == '__main__':
     main()
 ```
 
-## 创建数据库
+### 创建数据库
 
 MySQL 数据库中执行:
 
@@ -286,28 +287,28 @@ python manage.py migrate
 mysql -h127.0.0.1 -uroot -proot  beancount-trans < fixtures/20240507-Develop.sql  # 当前模板含有强烈的个人风格，建议根据自己情况修改
 ```
 
-## 开始运行
+### 开始运行
 
 执行： `python manage.py runserver 0:8002`
 
-浏览器打开 http://127.0.0.1:8002/translate/trans 就可以完成简单的账单转换。
+浏览器打开 <http://127.0.0.1:8002/translate/trans> 就可以完成简单的账单转换。
 
-# Beancount-Trans-Frontend
+## Beancount-Trans-Frontend
 
 修改 `.env` 配置文件使用 *本地开发环境* ：
 
-![](https://daihaorui.oss-cn-hangzhou.aliyuncs.com/djangoblog/202403171820731.png)
+![Beancount-Trans-Frontend配置文件](https://daihaorui.oss-cn-hangzhou.aliyuncs.com/djangoblog/202403171820731.png)
 
 运行前端程序：
 
 ```shell
-$ npm install 
-$ npm run dev  # 启动程序
+npm install
+npm run dev  # 启动程序
 ```
 
-浏览器打开 http://localhost:5173/ ，需要 Beancount-Trans-Backend 及数据库服务正常运行才能实现解析功能。
+浏览器打开 <http://localhost:5173/> ，需要 Beancount-Trans-Backend 及数据库服务正常运行才能实现解析功能。
 
-# 贡献 & 捐赠
+## 贡献 & 捐赠
 
 如果你希望对 Beancount-Trans-Backend 做出贡献，请阅读我们的 [贡献指南](https://github.com/dhr2333/Beancount-Trans-Backend?tab=readme-ov-file#%E8%B4%A1%E7%8C%AE%E6%8C%87%E5%8D%97)。
 
@@ -315,13 +316,15 @@ $ npm run dev  # 启动程序
 
 捐赠收入将全部用于提高 [网站](https://trans.dhr2333.cn/) 解析速度。
 
-## 微信 & 支付宝
+### 微信 & 支付宝
 
 微信支持标签解析，备注可添加后缀 `#TEST`
 
 支付宝支持信用卡及花呗支付
 
 <div>
-<img src="https://daihaorui.oss-cn-hangzhou.aliyuncs.com/djangoblog/202403311658448.png" width="150" height="150" />  
-<img src="https://daihaorui.oss-cn-hangzhou.aliyuncs.com/djangoblog/202405301410904.png" width="150" height="150" />  
+<img src="https://daihaorui.oss-cn-hangzhou.aliyuncs.com/djangoblog/202403311658448.png"
+ width="150" height="150" alt="微信支付" />
+<img src="https://daihaorui.oss-cn-hangzhou.aliyuncs.com/djangoblog/202405301410904.png"
+ width="150" height="150" alt="支付宝支付" />
 </div>
