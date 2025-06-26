@@ -2,3 +2,4 @@ collectstatic
 .idea
 .vscode
 Manjaro.session.sql
+docker-compose-beancount-trans.yaml
