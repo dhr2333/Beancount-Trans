@@ -10,3 +10,6 @@
 	path = Beancount-Trans-Assets
 	url = https://github.com/dhr2333/Beancount-Trans-Assets.git
 	branch = main
+[submodule "Beancount-Trans-Docs"]
+	path = Beancount-Trans-Docs
+	url = https://github.com/dhr2333/Beancount-Trans-Docs.git
