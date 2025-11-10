@@ -3,3 +3,10 @@ collectstatic
 .vscode
 Manjaro.session.sql
 docker-compose-beancount-trans.yaml
+node_modules
+package-lock.json
+npm-debug.log
+dist
+build
+coverage
+.DS_Store

@@ -1,0 +1,34 @@
+{
+  "name": "beancount-trans",
+  "version": "0.0.0-development",
+  "description": "Semantic release root workspace for Beancount-Trans monorepo",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "release": "semantic-release"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dhr2333/Beancount-Trans.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "bugs": {
+    "url": "https://github.com/dhr2333/Beancount-Trans/issues"
+  },
+  "homepage": "https://github.com/dhr2333/Beancount-Trans#readme",
+  "devDependencies": {
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/commit-analyzer": "^13.0.1",
+    "@semantic-release/exec": "^7.1.0",
+    "@semantic-release/git": "^10.0.1",
+    "@semantic-release/github": "^11.0.6",
+    "@semantic-release/release-notes-generator": "^14.1.0",
+    "conventional-changelog-conventionalcommits": "^9.1.0",
+    "semantic-release": "^24.2.9"
+  }
+}

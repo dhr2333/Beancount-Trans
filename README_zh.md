@@ -224,6 +224,19 @@ volumes:
 - [API 文档](https://trans.dhr2333.cn/api/redoc/)
 - [知识库/维基](https://www.dhr2333.cn/category/beancountfu-shi-ji-zhang.html)
 
+## 🚀 语义化发布流程
+
+仓库已接入 [semantic-release](https://semantic-release.gitbook.io/semantic-release/) 自动语义化发版体系。
+
+1. 所有提交需遵循 [Conventional Commits](https://www.conventionalcommits.org/zh-hans/) 规范（如 `feat: ...`、`fix: ...`）。
+2. 合并到 `main` 分支后，仓库根目录的 Jenkins 流水线会运行 `npx semantic-release`，自动生成标签、`CHANGELOG.md` 与 GitHub Release。
+3. 发布流程会同步更新以下文件的版本号：
+   - `Beancount-Trans/package.json`
+   - `Beancount-Trans-Frontend/package.json`
+   - `Beancount-Trans-Docs/package.json`
+   - `Beancount-Trans-Docs/docs/07-版本更新日志/v<version>.md`（若不存在会创建模板）
+4. 流水线完成后，可按需补充 changelog 与文档内容的详细说明。
+
 ## 👥 社区与支持
 
 - 🐛 [报告问题](https://github.com/dhr2333/Beancount-Trans/issues)
