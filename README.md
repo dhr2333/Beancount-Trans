@@ -198,6 +198,19 @@ Access the parser via <http://localhost:38001/trans> and copy the results into y
 * [Cloud Platform User Guide](/docs/parsing_spec.md)
 * [Beancount Getting Started](https://www.dhr2333.cn/article/2022/9/10/51.html) (Chinese)
 * [Deployment Guide](/docs/deployment.md)
+
+## 🚀 Semantic Release
+
+This repository adopts [semantic-release](https://semantic-release.gitbook.io/semantic-release/) for automated versioning and changelog generation.
+
+1. Follow the [Conventional Commits](https://www.conventionalcommits.org/) convention when writing commit messages (e.g. `feat: ...`, `fix: ...`).
+2. Merges into the `main` branch trigger the Jenkins pipeline located at the repository root. The pipeline runs `npx semantic-release`, bumping versions across sub-projects, generating `CHANGELOG.md`, and publishing a GitHub Release.
+3. Each release automatically synchronizes the new version into:
+   * `Beancount-Trans/package.json`
+   * `Beancount-Trans-Frontend/package.json`
+   * `Beancount-Trans-Docs/package.json`
+   * `Beancount-Trans-Docs/docs/07-版本更新日志/v<version>.md` (auto-created when absent)
+4. After the pipeline finishes, maintainers only need to edit the generated changelog entries and documentation templates as necessary.
 * [API Documentation](https://trans.dhr2333.cn/api/redoc/)
 * [Knowledge Base / Wiki](https://www.dhr2333.cn/category/beancountfu-shi-ji-zhang.html) (Chinese)
 
