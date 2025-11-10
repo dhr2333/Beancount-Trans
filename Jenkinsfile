@@ -1,5 +1,15 @@
 pipeline {
-    agent any
+    agent {
+        docker {
+            image 'node:lts-alpine'
+            args '-u root:root'
+            reuseNode true
+        }
+    }
+
+    tools {
+        nodejs 'NodeJS 25.1.0'
+    }
 
     options {
         timeout(time: 30, unit: 'MINUTES')
@@ -29,7 +39,10 @@ pipeline {
 
         stage('安装依赖') {
             steps {
-                sh 'npm ci'
+                sh '''
+                    npm install
+                    npm ci
+                '''
             }
         }
 
