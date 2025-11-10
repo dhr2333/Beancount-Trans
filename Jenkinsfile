@@ -1,11 +1,5 @@
 pipeline {
-    agent {
-        docker {
-            image 'node:lts-alpine'
-            args '-u root:root'
-            reuseNode true
-        }
-    }
+    agent any
 
     tools {
         nodejs 'NodeJS 25.1.0'
@@ -17,7 +11,6 @@ pipeline {
     }
 
     environment {
-        NODE_VERSION = '18'
         GITHUB_REPO = 'dhr2333/Beancount-Trans'
     }
 
@@ -25,6 +18,12 @@ pipeline {
         stage('Checkout') {
             steps {
                 checkout scm
+                sh '''
+                    git fetch --tags --prune --progress || true
+                    if [ -f $(git rev-parse --git-dir)/shallow ]; then
+                        git fetch --unshallow || true
+                    fi
+                '''
             }
         }
 
@@ -77,4 +76,3 @@ pipeline {
         }
     }
 }
-
