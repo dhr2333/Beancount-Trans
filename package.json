@@ -5,7 +5,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "release": "semantic-release"
+    "release": "TS_NODE_PROJECT=tsconfig.release.json NODE_OPTIONS='--loader ts-node/esm' semantic-release --config release.config.ts"
   },
   "repository": {
     "type": "git",
@@ -28,7 +28,10 @@
     "@semantic-release/git": "^10.0.1",
     "@semantic-release/github": "^11.0.6",
     "@semantic-release/release-notes-generator": "^14.1.0",
+    "@types/semantic-release": "^20.0.0",
     "conventional-changelog-conventionalcommits": "^9.1.0",
-    "semantic-release": "^24.2.9"
+    "semantic-release": "^24.2.9",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.0.4"
   }
 }

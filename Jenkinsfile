@@ -57,7 +57,7 @@ pipeline {
                         git config user.name "Beancount-Trans CI"
                         git config user.email "ci@beancount-trans.local"
                         git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPO}.git
-                        npx semantic-release
+                        TS_NODE_PROJECT=tsconfig.release.json NODE_OPTIONS='--loader ts-node/esm' npx semantic-release --config release.config.ts
                     '''
                 }
             }
