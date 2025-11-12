@@ -3,7 +3,7 @@ import type { Options } from 'semantic-release';
 const config: Options = {
   branches: ['main'],
   repositoryUrl: 'https://github.com/dhr2333/Beancount-Trans',
-  tagFormat: 'v${version}',
+  tagFormat: '${version}',
   plugins: [
     [
       '@semantic-release/commit-analyzer',
@@ -21,7 +21,7 @@ const config: Options = {
       '@semantic-release/git',
       {
         assets: ['package.json', 'package-lock.json'],
-        message: 'chore(release): v${nextRelease.version}\n\n${nextRelease.notes}'
+        message: 'chore(release): ${nextRelease.version}\n\n${nextRelease.notes}'
       }
     ],
     [
