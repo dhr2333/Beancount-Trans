@@ -9,40 +9,41 @@
 
 ## 🌟 Project Overview
 
-Beancount-Trans is a (self-hosted) intelligent bill conversion platform that helps users easily convert daily transaction statements (such as Alipay, WeChat Pay, bank statements, etc.) into a professional bookkeeping format (Beancount) and provides comprehensive financial reporting services.
+Beancount-Trans is a (self-hosted) intelligent bill conversion platform that helps users easily convert daily bills (such as Alipay, WeChat Pay, bank statements, etc.) into professional accounting formats, and provides complete financial reporting services.
 
 ### 🌍 Vision
 
-To enable ordinary users without accounting knowledge to easily use professional-grade double-entry bookkeeping tools, achieving transparent financial management.
+Enable ordinary users without accounting knowledge to easily use professional-level double-entry accounting tools for transparent financial management.
 
 ### ✨ Core Value
 
-* **Zero Learning Curve**: No accounting knowledge or technical background required.
-* **One-Click Reports**: Get complete financial reports just by uploading your statements.
-* **Smart Categorization**: AI-powered transaction category recognition.
-* **Privacy First**: Complete user data isolation ensures privacy.
+- **Zero Barrier to Use**: No accounting knowledge or technical background required
+- **One-Click Reporting**: Get complete financial reports with just your bills
+- **Smart Categorization**: AI-powered transaction category recognition
+- **Privacy First**: Complete user data isolation to ensure privacy
 
 ### 🚀 Core Features
 
-* 🔐 **Self-Hosting Support**: Fully open-source, supports private deployment.
-* 🧠 **AI-Powered Parsing**: Uses AI technologies like DeepSeek to automatically identify transaction categories.
-* 🔒 **Containerized Isolation**: Each user has an independent financial environment.
-* 📱 **Access Anywhere**: View your financial data anytime, anywhere.
-* 📁 **Statement File Management**: Supports common statement formats like CSV, PDF, Excel.
-* 📊 **Financial Reporting Services**: Automatically generates professional financial reports.
-* ⚡ **Asynchronous Processing**: Optional batch processing after upload for fast report generation.
+- 🔐 **Self-Hosting Support**: Fully open source, supports private deployment
+- 🧠 **AI Intelligent Parsing**: Automatically identifies transaction categories using AI technologies like DeepSeek
+- 🔒 **Containerized Isolation**: Each user has an independent financial environment
+- 🔑 **Two-Factor Authentication (2FA)**: Enhanced account security
+- 📱 **Access Anywhere**: View financial data anytime, anywhere
+- 📁 **Bill File Management**: Supports common bill formats like CSV/PDF/Excel
+- 📊 **Financial Reporting Services**: Automatically generates professional financial reports
+- ⚡ **Asynchronous Processing**: Optional batch processing after bill upload for fast report generation
 
 ## 🛠️ Technical Architecture
 
 ```mermaid
 graph TD
     A[Web Frontend] -->|API Requests| B(Traefik Gateway)
-    B -->|JWT Auth| C[Django REST API]
-    C --> D[Statement Parser Engine]
+    B -->|JWT Authentication| C[Django REST API]
+    C --> D[Bill Parsing Engine]
     D --> E[AI Classification Model]
     E -->|BERT/spaCy/DeepSeek| F[Account Mapping Service]
     C --> G[Celery Task Queue]
-    G --> H[Parsing Worker]
+    G --> H[Bill Parsing Worker]
     H --> I[MinIO/S3]
     H --> J[File System]
     J --> K[Fava Container]
@@ -51,7 +52,7 @@ graph TD
     K -->|Traefik Routing| N[User Access]
 ```
 
-### Cloud Platform Parsing Flow
+### Cloud Platform Parsing Process
 
 ```mermaid
 sequenceDiagram
@@ -65,46 +66,46 @@ sequenceDiagram
     participant MinIO
     participant FavaContainer
     participant FileSystem
-    participant Scheduler
-
-    User->>Frontend: 1. Upload Statement File
+    participant ScheduledTask
+    
+    User->>Frontend: 1. Upload Bill File
     Frontend->>Backend: Send File
-    Backend->>MinIO: Store Raw File
-    Backend->>FileSystem: Create Empty .bean File
-    Backend->>PostgreSQL: Record Upload Info
-
-    User->>Frontend: 2. Submit Batch Parse Request
-    Frontend->>Backend: Submit Parse Request
+    Backend->>MinIO: Store Original File
+    Backend->>FileSystem: Create Same Name .bean File
+    Backend->>PostgreSQL: Record Upload Information
+    
+    User->>Frontend: 2. Submit Batch Parsing
+    Frontend->>Backend: Submit Parsing Request
     Backend->>Celery: Create Task
-    Celery->>Worker: Start Job
+    Celery->>Worker: Start Parsing
     Worker->>MinIO: Get File
-    Worker->>Worker: Parse Statement Content
+    Worker->>Worker: Parse Bill Content
     Worker->>PostgreSQL: Get Mapping Rules
     alt Keyword Conflict
-        Worker->>Worker: Call AI for Judgment
+        Worker->>Worker: Call AI Judgment
     end
-    Worker->>FileSystem: Store Parse Result (.bean)
+    Worker->>FileSystem: Store Parsing Results (.bean)
     Backend-->>Frontend: Return Task ID
-
+    
     loop Status Polling
         User->>Frontend: Check Progress
         Frontend->>Backend: Query Task Status
         Backend-->>Frontend: Return Progress
     end
-
+    
     User->>Frontend: 3. Access "Platform Ledger"
     Frontend->>Backend: GET /api/fava
     alt Container Exists
-        Backend->>Backend: Reset Expiry Timer
-    else
+        Backend->>Backend: Reset Expiration Timer
+    else 
         Backend->>FavaContainer: Create Container
     end
     Backend-->>Frontend: Return Ledger URL
     Frontend->>FavaContainer: Redirect
     FavaContainer-->>User: Display Reports
-
+    
     rect rgba(0, 255, 0, 0.1)
-        Scheduler->>Backend: Trigger Every Minute
+        ScheduledTask->>Backend: Trigger Every Minute
         Backend->>FavaContainer: Check Last Access Time
         alt Timeout (>1 hour)
             Backend->>FavaContainer: Destroy Container
@@ -114,45 +115,47 @@ sequenceDiagram
 
 ## 🎥 Platform Demo
 
+The format conversion page does not retain any uploaded files or information; all optional functions are for parsing purposes.
+
+![Beancount-Trans Parsing Homepage](https://daihaorui.oss-cn-hangzhou.aliyuncs.com/djangoblog/202508191716372.png)
+
 ![Cloud Platform User Demo Video](https://daihaorui.oss-cn-hangzhou.aliyuncs.com/djangoblog/202508191544942.gif)
 
 ## 🚀 Quick Start
 
 ### 👤 Cloud Platform Users
 
-Just 3 steps from statement upload to professional financial reports:
+Just 3 steps from bill upload to financial report generation:
 
-#### Step 1: Register & Login
+#### Step 1: Register and Login
 
-1. Visit the [Beancount-Trans Platform](https://trans.dhr2333.cn/)
-2. Create a new account or use a third-party login.
+1. Visit [Beancount-Trans Platform](https://trans.dhr2333.cn/)
+2. Register as a new user or use third-party login
 
-#### Step 2: Upload & Parse Statements
+#### Step 2: Upload and Parse Bills
 
-1. Click "Upload Statement" on the File Management page.
-2. Select your Alipay, WeChat, or bank statement file.
-3. Select the statements for batch parsing and conversion to the professional format.
-
-Example Output (`beancount` format):
+1. Click "Upload Bill" on the file management page
+2. Select Alipay, WeChat, or bank statement files
+3. Select Batch Parse Bill Records to Ledger
 
 ```beancount
-2018-01-19 * "Ctrip" "Danqing Lily Business Hotel (Changzhou Jinghu High-speed Rail North Station Branch)"
+2018-01-19 * "携程旅行网" "丹青百合商务酒店(常州京沪高铁北站店)" #Business
     time: "14:41:51"
     uuid: "2018011921001004560568228384"
-    status: "ALiPay - Transaction Successful"
+    status: "ALiPay - 交易成功"
     Expenses:Culture 128.00 CNY
     Liabilities:CreditCard:Web:AliPay -128.00 CNY
 ```
 
 #### Step 3: Access Financial Reports
 
-1. Click "Platform Ledger" in the navigation bar under "Ledger Management".
-2. The system will automatically create your dedicated financial container.
-3. View professional financial reports including:
-    * 💰 Income Statement (Income vs. Expenses)
-    * 🏦 Balance Sheet (Assets vs. Liabilities)
-    * 📈 Spending Category Statistics
-    * 📆 Monthly Financial Trends
+1. Click "Platform Ledger" in the navigation bar under "Ledger Management"
+2. The system will automatically create your exclusive financial container
+3. View professional financial reports:
+   - 💰 Income Statement (Income vs Expenses)
+   - 🏦 Balance Sheet (Assets vs Liabilities)
+   - 📈 Spending Category Statistics
+   - 📆 Monthly Financial Trends
 
 ### 🖥 Self-Hosted Deployment Guide
 
@@ -160,7 +163,7 @@ Example Output (`beancount` format):
 
 ```shell
 git clone https://github.com/dhr2333/Beancount-Trans.git
-cd Beancount-Trans
+cd Beancount-Trans;
 git submodule update --init  # Initialize all submodules
 ```
 
@@ -170,66 +173,60 @@ The first run will automatically create storage volumes named `postgres-data` an
 
 All container ports can be specified as needed.
 
-Run the following command in the main Beancount-Trans directory:
+Run in the Beancount-Trans main directory:
 
 ```shell
-docker compose up  # Add the -d flag to run in detached mode
+docker compose up  # Add -d parameter to run in background
 ```
-
-Alternatively, build and then run:
-
-```shell
-# If using build configuration in compose file (example snippet shown)
-$ docker compose build  # Build images
-$ docker compose up    # Start containers
-```
-
-![docker compose build start_1](https://daihaorui.oss-cn-hangzhou.aliyuncs.com/djangoblog/202403120934590.png)
-![docker compose build start_2](https://daihaorui.oss-cn-hangzhou.aliyuncs.com/djangoblog/202403120934209.png)
 
 #### Access
 
-Access the parser via <http://localhost:38001/trans> and copy the results into your local ledger.
+Visit <http://localhost:38001/trans> to upload files for parsing, then copy the parsing results into your local ledger.
 
-![Beancount-Trans Parser Homepage](https://daihaorui.oss-cn-hangzhou.aliyuncs.com/djangoblog/202508191716372.png)
+#### 📊 Persistent Storage
 
-## 📚 Documentation & Resources
+PostgreSQL uses initialization data by default and does not use persistent storage. If persistent storage is needed, uncomment the following:
 
-* [Cloud Platform User Guide](/docs/parsing_spec.md)
-* [Beancount Getting Started](https://www.dhr2333.cn/article/2022/9/10/51.html) (Chinese)
-* [Deployment Guide](/docs/deployment.md)
+```yaml
+beancount-trans-postgres:
+  volumes:
+    - postgres:/var/lib/postgresql/data  # Uncomment this and the comment in volumes if persistent storage is needed
+volumes:
+  postgres:
+    external: true  # Uncomment if external storage volume has been created (multiple docker compose up may cause volume duplication and startup failure)
+    name: postgres-data
+  redis:
+    external: true  # Uncomment if external storage volume has been created
+    name: redis-data
+```
 
-## 🚀 Semantic Release
+## 📚 Documentation Resources
 
-This repository adopts [semantic-release](https://semantic-release.gitbook.io/semantic-release/) for automated versioning and changelog generation.
-
-1. Follow the [Conventional Commits](https://www.conventionalcommits.org/) convention when writing commit messages (e.g. `feat: ...`, `fix: ...`).
-2. Merges into the `main` branch trigger the Jenkins pipeline located at the repository root. The pipeline runs `npx semantic-release`, bumping versions across sub-projects, generating `CHANGELOG.md`, and publishing a GitHub Release.
-3. Each release automatically synchronizes the new version into:
-   * `Beancount-Trans/package.json`
-   * `Beancount-Trans-Frontend/package.json`
-   * `Beancount-Trans-Docs/package.json`
-   * `Beancount-Trans-Docs/docs/07-版本更新日志/v<version>.md` (auto-created when absent)
-4. After the pipeline finishes, maintainers only need to edit the generated changelog entries and documentation templates as necessary.
-* [API Documentation](https://trans.dhr2333.cn/api/redoc/)
-* [Knowledge Base / Wiki](https://www.dhr2333.cn/category/beancountfu-shi-ji-zhang.html) (Chinese)
+- [Cloud Platform User Manual](https://trans.dhr2333.cn/docs/quick-start/)
+- [Beancount Getting Started](https://www.dhr2333.cn/article/2022/9/10/51.html)
+- [Deployment Guide](https://trans.dhr2333.cn/docs/%E8%87%AA%E6%89%98%E7%AE%A1/deploy)
+- [API Documentation](https://trans.dhr2333.cn/api/redoc/)
+- [Knowledge Base/Wiki](https://www.dhr2333.cn/category/beancountfu-shi-ji-zhang.html)
 
 ## 👥 Community & Support
 
-* 🐛 [Report Issues](https://github.com/dhr2333/Beancount-Trans/issues)
-* 💬 [Discussions](https://github.com/dhr2333/Beancount-Trans/discussions)
-* 📧 [Support Email](mailto:dai_haorui@163.com)
+- 🐛 [Report Issues](https://github.com/dhr2333/Beancount-Trans/issues)
+- 💬 [Discussion Forum](https://github.com/dhr2333/Beancount-Trans/discussions)
+- 🐧 [QQ Group](https://qm.qq.com/q/W1hsFN6fGq)
+<img src="https://daihaorui.oss-cn-hangzhou.aliyuncs.com/djangoblog/202508251100915.jpg" style="width:428px; height:763px;" alt="Beancount-Trans QQ Group" />
+- 📧 [Support Email](mailto:dai_haorui@163.com)
 
 ## ❤️ Support Us
 
-Donations will be used entirely to improve the parsing speed of the [website](https://trans.dhr2333.cn/).
+All donation income will be used to improve the [platform's](https://trans.dhr2333.cn/) parsing speed
 
-WeChat Pay supports label parsing, add suffix `#TEST` in the notes if needed.
-Alipay supports credit card and Huabei payments.
+WeChat Pay supports label parsing, you can add suffix `#TEST` in remarks
+
+Alipay supports credit card and Huabei payments
 
 <div>
 <img src="https://daihaorui.oss-cn-hangzhou.aliyuncs.com/djangoblog/202403311658448.png"
- width="150" height="150" alt="WeChat Pay QR Code" />
+ width="300" height="300" alt="WeChat Pay" />
 <img src="https://daihaorui.oss-cn-hangzhou.aliyuncs.com/djangoblog/202405301410904.png"
- width="150" height="150" alt="Alipay QR Code" />
+ width="266" height="300" alt="Alipay" />
 </div>

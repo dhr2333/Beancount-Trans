@@ -27,6 +27,7 @@ Beancount-Trans 是一款（自托管）智能账单转换平台，帮助用户�
 - 🔐 **自托管支持**：完整开源，支持私有化部署
 - 🧠 **AI 智能解析**：使用 DeepSeek 等 AI 技术自动识别交易类别
 - 🔒 **容器化隔离**：每个用户拥有独立的财务环境
+- 🔑 **双因素认证 (2FA)**：增强账户安全
 - 📱 **随时随地访问**：随时查看财务数据
 - 📁 **账单文件管理**：支持 CSV/PDF/Excel 等常见账单格式
 - 📊 **财务报表服务**：自动生成专业财务报表
@@ -114,27 +115,31 @@ sequenceDiagram
 
 ## 🎥 平台演示
 
+格式转换页面不保留任何上传的文件及信息，所有可选功能均为解析功能服务。
+
+![Beancount-Trans 解析首页](https://daihaorui.oss-cn-hangzhou.aliyuncs.com/djangoblog/202508191716372.png)
+
 ![云平台用户演示视频](https://daihaorui.oss-cn-hangzhou.aliyuncs.com/djangoblog/202508191544942.gif)
 
 ## 🚀 快速开始
 
 ### 👤 云平台用户
 
-只需 3 步，从账单上传到专业财务报表：
+只需 3 步，从账单上传到生成财务报表：
 
 #### 步骤 1: 注册登录
 
 1. 访问 [Beancount-Trans 平台](https://trans.dhr2333.cn/)
-2. 创建新账户或使用第三方登录
+2. 注册新用户或使用第三方登录
 
 #### 步骤 2: 上传账单并解析
 
 1. 在文件管理页面点击 " 上传账单 "
 2. 选择支付宝、微信或银行账单文件
-3. 选中账单批量解析并转换为专业格式
+3. 选中账单批量解析记录至账本
 
 ```beancount
-2018-01-19 * "携程旅行网" "丹青百合商务酒店(常州京沪高铁北站店)"
+2018-01-19 * "携程旅行网" "丹青百合商务酒店(常州京沪高铁北站店)" #Business
     time: "14:41:51"
     uuid: "2018011921001004560568228384"
     status: "ALiPay - 交易成功"
@@ -174,30 +179,9 @@ git submodule update --init  # 初始化所有子模块
 docker compose up  # 增加 -d 参数可实现后台运行
 ```
 
-或 编译后运行
-
-```shell
-services:
-  beancount-trans-frontend:
-    # image: dhr2333/beancount-trans-frontend:latest
-    build:
-      context: ./Beancount-Trans-Frontend
-      dockerfile: Dockerfile
-      args:
-        - "--no-cache"
-$ docker compose build  # 编译
-$ docker compose up
-```
-
-![docker compose编译启动_1](https://daihaorui.oss-cn-hangzhou.aliyuncs.com/djangoblog/202403120934590.png)
-
-![docker compose编译启动_2](https://daihaorui.oss-cn-hangzhou.aliyuncs.com/djangoblog/202403120934209.png)
-
 #### 访问
 
-通过 <http://localhost:38001/trans> 进行解析，将解析结果复制进本地账本
-
-![Beancount-Trans 解析首页](https://daihaorui.oss-cn-hangzhou.aliyuncs.com/djangoblog/202508191716372.png)
+通过 <http://localhost:38001/trans> 进行上传文件解析，将解析结果复制进本地账本。
 
 #### 📊 持久化存储
 
@@ -218,34 +202,23 @@ volumes:
 
 ## 📚 文档资源
 
-- [云平台用户手册](/docs/parsing_spec.md)
+- [云平台用户手册](https://trans.dhr2333.cn/docs/quick-start/)
 - [Beancount 入门](https://www.dhr2333.cn/article/2022/9/10/51.html)
-- [部署指南](/docs/deployment.md)
+- [部署指南](https://trans.dhr2333.cn/docs/%E8%87%AA%E6%89%98%E7%AE%A1/deploy)
 - [API 文档](https://trans.dhr2333.cn/api/redoc/)
 - [知识库/维基](https://www.dhr2333.cn/category/beancountfu-shi-ji-zhang.html)
-
-## 🚀 语义化发布流程
-
-仓库已接入 [semantic-release](https://semantic-release.gitbook.io/semantic-release/) 自动语义化发版体系。
-
-1. 所有提交需遵循 [Conventional Commits](https://www.conventionalcommits.org/zh-hans/) 规范（如 `feat: ...`、`fix: ...`）。
-2. 合并到 `main` 分支后，仓库根目录的 Jenkins 流水线会运行 `npx semantic-release`，自动生成标签、`CHANGELOG.md` 与 GitHub Release。
-3. 发布流程会同步更新以下文件的版本号：
-   - `Beancount-Trans/package.json`
-   - `Beancount-Trans-Frontend/package.json`
-   - `Beancount-Trans-Docs/package.json`
-   - `Beancount-Trans-Docs/docs/07-版本更新日志/v<version>.md`（若不存在会创建模板）
-4. 流水线完成后，可按需补充 changelog 与文档内容的详细说明。
 
 ## 👥 社区与支持
 
 - 🐛 [报告问题](https://github.com/dhr2333/Beancount-Trans/issues)
 - 💬 [讨论区](https://github.com/dhr2333/Beancount-Trans/discussions)
+- 🐧 [QQ群](https://qm.qq.com/q/W1hsFN6fGq)
+<img src="https://daihaorui.oss-cn-hangzhou.aliyuncs.com/djangoblog/202508251100915.jpg" style="width:428px; height:763px;" alt="Beancount-Trans QQ群" />
 - 📧 [支持邮箱](mailto:dai_haorui@163.com)
 
 ## ❤️ 支持我们
 
-捐赠收入将全部用于提高 [网站](https://trans.dhr2333.cn/) 解析速度
+捐赠收入将全部用于提高 [平台](https://trans.dhr2333.cn/) 解析速度
 
 微信支持标签解析，备注可添加后缀 `#TEST`
 
@@ -253,7 +226,7 @@ volumes:
 
 <div>
 <img src="https://daihaorui.oss-cn-hangzhou.aliyuncs.com/djangoblog/202403311658448.png"
- width="150" height="150" alt="微信支付" />
+ width="300" height="300" alt="微信支付" />
 <img src="https://daihaorui.oss-cn-hangzhou.aliyuncs.com/djangoblog/202405301410904.png"
- width="150" height="150" alt="支付宝支付" />
+ width="266" height="300" alt="支付宝支付" />
 </div>
