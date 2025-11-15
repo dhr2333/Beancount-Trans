@@ -1,235 +1,232 @@
 # Beancount-Trans
 
-[![README in English](https://img.shields.io/badge/English-DFE0E5)](README.md)
-[![简体中文版自述文件](https://img.shields.io/badge/简体中文-DBEDFA)](README_zh.md)
+[![README in English](https://img.shields.io/badge/English-DFE0E5)](README_en.md)
+[![简体中文版自述文件](https://img.shields.io/badge/简体中文-DBEDFA)](README.md)
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Python Version](https://img.shields.io/badge/python-3.9%2B-blue.svg)](https://www.python.org/)
 [![Docker](https://img.shields.io/badge/docker-available-blue.svg)](https://www.docker.com/)
 
-## 🌟 Project Overview
+## 🌟 项目概述
 
-Beancount-Trans is a (self-hosted) intelligent bill conversion platform that helps users easily convert daily transaction statements (such as Alipay, WeChat Pay, bank statements, etc.) into a professional bookkeeping format (Beancount) and provides comprehensive financial reporting services.
+Beancount-Trans 是一款（自托管）智能账单转换平台，帮助用户轻松将日常账单（如支付宝、微信支付、银行账单等）转换为专业记账格式，并提供完整的财务报表服务。
 
-### 🌍 Vision
+### 🌍 愿景
 
-To enable ordinary users without accounting knowledge to easily use professional-grade double-entry bookkeeping tools, achieving transparent financial management.
+让无会计知识的普通用户也能轻松使用专业级复式记账工具，实现财务透明化管理。
 
-### ✨ Core Value
+### ✨ 核心价值
 
-* **Zero Learning Curve**: No accounting knowledge or technical background required.
-* **One-Click Reports**: Get complete financial reports just by uploading your statements.
-* **Smart Categorization**: AI-powered transaction category recognition.
-* **Privacy First**: Complete user data isolation ensures privacy.
+- **零门槛使用**：无需会计知识或技术背景
+- **一键式报表**：只需账单即得完整财务报表
+- **智能分类**：AI 驱动的交易类别识别
+- **隐私优先**：用户数据完全隔离，保障隐私
 
-### 🚀 Core Features
+### 🚀 核心特性
 
-* 🔐 **Self-Hosting Support**: Fully open-source, supports private deployment.
-* 🧠 **AI-Powered Parsing**: Uses AI technologies like DeepSeek to automatically identify transaction categories.
-* 🔒 **Containerized Isolation**: Each user has an independent financial environment.
-* 📱 **Access Anywhere**: View your financial data anytime, anywhere.
-* 📁 **Statement File Management**: Supports common statement formats like CSV, PDF, Excel.
-* 📊 **Financial Reporting Services**: Automatically generates professional financial reports.
-* ⚡ **Asynchronous Processing**: Optional batch processing after upload for fast report generation.
+- 🔐 **自托管支持**：完整开源，支持私有化部署
+- 🧠 **AI 智能解析**：使用 DeepSeek 等 AI 技术自动识别交易类别
+- 🔒 **容器化隔离**：每个用户拥有独立的财务环境
+- 🔑 **双因素认证 (2FA)**：增强账户安全
+- 📱 **随时随地访问**：随时查看财务数据
+- 📁 **账单文件管理**：支持 CSV/PDF/Excel 等常见账单格式
+- 📊 **财务报表服务**：自动生成专业财务报表
+- ⚡ **异步处理**：账单上传后可选批量处理，快速生成报表
 
-## 🛠️ Technical Architecture
+## 🛠️ 技术架构
 
 ```mermaid
 graph TD
-    A[Web Frontend] -->|API Requests| B(Traefik Gateway)
-    B -->|JWT Auth| C[Django REST API]
-    C --> D[Statement Parser Engine]
-    D --> E[AI Classification Model]
-    E -->|BERT/spaCy/DeepSeek| F[Account Mapping Service]
-    C --> G[Celery Task Queue]
-    G --> H[Parsing Worker]
+    A[Web前端] -->|API请求| B(Traefik网关)
+    B -->|JWT鉴权| C[Django REST API]
+    C --> D[账单解析引擎]
+    D --> E[AI分类模型]
+    E -->|BERT/spaCy/DeepSeek| F[账户映射服务]
+    C --> G[Celery任务队列]
+    G --> H[账单解析Worker]
     H --> I[MinIO/S3]
-    H --> J[File System]
-    J --> K[Fava Container]
+    H --> J[文件系统]
+    J --> K[Fava容器]
     C --> L[PostgreSQL]
     C --> M[Redis]
-    K -->|Traefik Routing| N[User Access]
+    K -->|Traefik路由| N[用户访问]
 ```
 
-### Cloud Platform Parsing Flow
+### 云平台解析流程
 
 ```mermaid
 sequenceDiagram
-    participant User
-    participant Frontend
-    participant Backend
+    participant 用户
+    participant 前端
+    participant 后端
     participant PostgreSQL
     participant Celery
     participant Worker
     participant Redis
     participant MinIO
-    participant FavaContainer
-    participant FileSystem
-    participant Scheduler
-
-    User->>Frontend: 1. Upload Statement File
-    Frontend->>Backend: Send File
-    Backend->>MinIO: Store Raw File
-    Backend->>FileSystem: Create Empty .bean File
-    Backend->>PostgreSQL: Record Upload Info
-
-    User->>Frontend: 2. Submit Batch Parse Request
-    Frontend->>Backend: Submit Parse Request
-    Backend->>Celery: Create Task
-    Celery->>Worker: Start Job
-    Worker->>MinIO: Get File
-    Worker->>Worker: Parse Statement Content
-    Worker->>PostgreSQL: Get Mapping Rules
-    alt Keyword Conflict
-        Worker->>Worker: Call AI for Judgment
+    participant Fava容器
+    participant 文件系统
+    participant 定时任务
+    
+    用户->>前端: 1. 上传账单文件
+    前端->>后端: 发送文件
+    后端->>MinIO: 存储原始文件
+    后端->>文件系统: 创建同名.bean文件
+    后端->>PostgreSQL: 记录上传信息
+    
+    用户->>前端: 2. 提交批量解析
+    前端->>后端: 提交解析请求
+    后端->>Celery: 创建任务
+    Celery->>Worker: 启动解析
+    Worker->>MinIO: 获取文件
+    Worker->>Worker: 解析账单内容
+    Worker->>PostgreSQL: 获取映射规则
+    alt 关键字冲突
+        Worker->>Worker: 调用AI判断
     end
-    Worker->>FileSystem: Store Parse Result (.bean)
-    Backend-->>Frontend: Return Task ID
-
-    loop Status Polling
-        User->>Frontend: Check Progress
-        Frontend->>Backend: Query Task Status
-        Backend-->>Frontend: Return Progress
+    Worker->>文件系统: 存储解析结果(.bean)
+    后端-->>前端: 返回任务ID
+    
+    loop 状态轮询
+        用户->>前端: 查看进度
+        前端->>后端: 查询任务状态
+        后端-->>前端: 返回进度
     end
-
-    User->>Frontend: 3. Access "Platform Ledger"
-    Frontend->>Backend: GET /api/fava
-    alt Container Exists
-        Backend->>Backend: Reset Expiry Timer
-    else
-        Backend->>FavaContainer: Create Container
+    
+    用户->>前端: 3. 访问"平台账本"
+    前端->>后端: GET /api/fava
+    alt 容器已存在
+        后端->>后端: 重置过期计时
+    else 
+        后端->>Fava容器: 创建容器
     end
-    Backend-->>Frontend: Return Ledger URL
-    Frontend->>FavaContainer: Redirect
-    FavaContainer-->>User: Display Reports
-
+    后端-->>前端: 返回账本URL
+    前端->>Fava容器: 重定向
+    Fava容器-->>用户: 显示报表
+    
     rect rgba(0, 255, 0, 0.1)
-        Scheduler->>Backend: Trigger Every Minute
-        Backend->>FavaContainer: Check Last Access Time
-        alt Timeout (>1 hour)
-            Backend->>FavaContainer: Destroy Container
+        定时任务->>后端: 每分钟触发
+        后端->>Fava容器: 检查最后访问时间
+        alt 超时(>1小时)
+            后端->>Fava容器: 销毁容器
         end
     end
 ```
 
-## 🎥 Platform Demo
+## 🎥 平台演示
 
-![Cloud Platform User Demo Video](https://daihaorui.oss-cn-hangzhou.aliyuncs.com/djangoblog/202508191544942.gif)
+格式转换页面不保留任何上传的文件及信息，所有可选功能均为解析功能服务。
 
-## 🚀 Quick Start
+![Beancount-Trans 解析首页](https://daihaorui.oss-cn-hangzhou.aliyuncs.com/djangoblog/202508191716372.png)
 
-### 👤 Cloud Platform Users
+![云平台用户演示视频](https://daihaorui.oss-cn-hangzhou.aliyuncs.com/djangoblog/202508191544942.gif)
 
-Just 3 steps from statement upload to professional financial reports:
+## 🚀 快速开始
 
-#### Step 1: Register & Login
+### 👤 云平台用户
 
-1. Visit the [Beancount-Trans Platform](https://trans.dhr2333.cn/)
-2. Create a new account or use a third-party login.
+只需 3 步，从账单上传到生成财务报表：
 
-#### Step 2: Upload & Parse Statements
+#### 步骤 1: 注册登录
 
-1. Click "Upload Statement" on the File Management page.
-2. Select your Alipay, WeChat, or bank statement file.
-3. Select the statements for batch parsing and conversion to the professional format.
+1. 访问 [Beancount-Trans 平台](https://trans.dhr2333.cn/)
+2. 注册新用户或使用第三方登录
 
-Example Output (`beancount` format):
+#### 步骤 2: 上传账单并解析
+
+1. 在文件管理页面点击 " 上传账单 "
+2. 选择支付宝、微信或银行账单文件
+3. 选中账单批量解析记录至账本
 
 ```beancount
-2018-01-19 * "Ctrip" "Danqing Lily Business Hotel (Changzhou Jinghu High-speed Rail North Station Branch)"
+2018-01-19 * "携程旅行网" "丹青百合商务酒店(常州京沪高铁北站店)" #Business
     time: "14:41:51"
     uuid: "2018011921001004560568228384"
-    status: "ALiPay - Transaction Successful"
+    status: "ALiPay - 交易成功"
     Expenses:Culture 128.00 CNY
     Liabilities:CreditCard:Web:AliPay -128.00 CNY
 ```
 
-#### Step 3: Access Financial Reports
+#### 步骤 3: 访问财务报表
 
-1. Click "Platform Ledger" in the navigation bar under "Ledger Management".
-2. The system will automatically create your dedicated financial container.
-3. View professional financial reports including:
-    * 💰 Income Statement (Income vs. Expenses)
-    * 🏦 Balance Sheet (Assets vs. Liabilities)
-    * 📈 Spending Category Statistics
-    * 📆 Monthly Financial Trends
+1. 在导航栏 " 账本管理 " 中点击 " 平台账本 "
+2. 系统会自动创建您的专属财务容器
+3. 查看专业财务报表：
+   - 💰 损益表（收入 vs 支出）
+   - 🏦 资产负债表（资产 vs 负债）
+   - 📈 消费分类统计
+   - 📆 月度财务趋势
 
-### 🖥 Self-Hosted Deployment Guide
+### 🖥 自托管部署指南
 
-#### Project Initialization
+#### 项目初始化
 
 ```shell
 git clone https://github.com/dhr2333/Beancount-Trans.git
-cd Beancount-Trans
-git submodule update --init  # Initialize all submodules
+cd Beancount-Trans;
+git submodule update --init  # 初始化所有子模块
 ```
 
-#### First Run
+#### 首次运行
 
-The first run will automatically create storage volumes named `postgres-data` and `redis-data`.
+首次运行会自动创建名为 `postgres-data` 和 `redis-data` 的存储卷。
 
-All container ports can be specified as needed.
+所有容器端口可自行指定。
 
-Run the following command in the main Beancount-Trans directory:
+在 Benacount-Trans 主目录下运行
 
 ```shell
-docker compose up  # Add the -d flag to run in detached mode
+docker compose up  # 增加 -d 参数可实现后台运行
 ```
 
-Alternatively, build and then run:
+#### 访问
 
-```shell
-# If using build configuration in compose file (example snippet shown)
-$ docker compose build  # Build images
-$ docker compose up    # Start containers
+通过 <http://localhost:38001/trans> 进行上传文件解析，将解析结果复制进本地账本。
+
+#### 📊 持久化存储
+
+PostgreSQL 默认使用初始化数据，并不做持久化存储。若需要持久化存储需要放开以下注释：
+
+```yaml
+beancount-trans-postgres:
+  volumes:
+    - postgres:/var/lib/postgresql/data  # 若需要持久存储取消该注释和volumes中的注释
+volumes:
+  postgres:
+    external: true  # 若已创建外部存储卷，则取消该注释(多次docker compose up可能会导致存储卷重复创建导致启动失败)
+    name: postgres-data
+  redis:
+    external: true  # 若已创建外部存储卷，则取消该注释
+    name: redis-data
 ```
 
-![docker compose build start_1](https://daihaorui.oss-cn-hangzhou.aliyuncs.com/djangoblog/202403120934590.png)
-![docker compose build start_2](https://daihaorui.oss-cn-hangzhou.aliyuncs.com/djangoblog/202403120934209.png)
+## 📚 文档资源
 
-#### Access
+- [云平台用户手册](https://trans.dhr2333.cn/docs/quick-start/)
+- [Beancount 入门](https://www.dhr2333.cn/article/2022/9/10/51.html)
+- [部署指南](https://trans.dhr2333.cn/docs/%E8%87%AA%E6%89%98%E7%AE%A1/deploy)
+- [API 文档](https://trans.dhr2333.cn/api/redoc/)
+- [知识库/维基](https://www.dhr2333.cn/category/beancountfu-shi-ji-zhang.html)
 
-Access the parser via <http://localhost:38001/trans> and copy the results into your local ledger.
+## 👥 社区与支持
 
-![Beancount-Trans Parser Homepage](https://daihaorui.oss-cn-hangzhou.aliyuncs.com/djangoblog/202508191716372.png)
+- 🐛 [报告问题](https://github.com/dhr2333/Beancount-Trans/issues)
+- 💬 [讨论区](https://github.com/dhr2333/Beancount-Trans/discussions)
+- 🐧 [QQ群](https://qm.qq.com/q/W1hsFN6fGq)
+<img src="https://daihaorui.oss-cn-hangzhou.aliyuncs.com/djangoblog/202508251100915.jpg" style="width:428px; height:763px;" alt="Beancount-Trans QQ群" />
+- 📧 [支持邮箱](mailto:dai_haorui@163.com)
 
-## 📚 Documentation & Resources
+## ❤️ 支持我们
 
-* [Cloud Platform User Guide](/docs/parsing_spec.md)
-* [Beancount Getting Started](https://www.dhr2333.cn/article/2022/9/10/51.html) (Chinese)
-* [Deployment Guide](/docs/deployment.md)
+捐赠收入将全部用于提高 [平台](https://trans.dhr2333.cn/) 解析速度
 
-## 🚀 Semantic Release
+微信支持标签解析，备注可添加后缀 `#TEST`
 
-This repository adopts [semantic-release](https://semantic-release.gitbook.io/semantic-release/) for automated versioning and changelog generation.
-
-1. Follow the [Conventional Commits](https://www.conventionalcommits.org/) convention when writing commit messages (e.g. `feat: ...`, `fix: ...`).
-2. Merges into the `main` branch trigger the Jenkins pipeline located at the repository root. The pipeline runs `npx semantic-release`, bumping versions across sub-projects, generating `CHANGELOG.md`, and publishing a GitHub Release.
-3. Each release automatically synchronizes the new version into:
-   * `Beancount-Trans/package.json`
-   * `Beancount-Trans-Frontend/package.json`
-   * `Beancount-Trans-Docs/package.json`
-   * `Beancount-Trans-Docs/docs/07-版本更新日志/v<version>.md` (auto-created when absent)
-4. After the pipeline finishes, maintainers only need to edit the generated changelog entries and documentation templates as necessary.
-* [API Documentation](https://trans.dhr2333.cn/api/redoc/)
-* [Knowledge Base / Wiki](https://www.dhr2333.cn/category/beancountfu-shi-ji-zhang.html) (Chinese)
-
-## 👥 Community & Support
-
-* 🐛 [Report Issues](https://github.com/dhr2333/Beancount-Trans/issues)
-* 💬 [Discussions](https://github.com/dhr2333/Beancount-Trans/discussions)
-* 📧 [Support Email](mailto:dai_haorui@163.com)
-
-## ❤️ Support Us
-
-Donations will be used entirely to improve the parsing speed of the [website](https://trans.dhr2333.cn/).
-
-WeChat Pay supports label parsing, add suffix `#TEST` in the notes if needed.
-Alipay supports credit card and Huabei payments.
+支付宝支持信用卡及花呗支付
 
 <div>
 <img src="https://daihaorui.oss-cn-hangzhou.aliyuncs.com/djangoblog/202403311658448.png"
- width="150" height="150" alt="WeChat Pay QR Code" />
+ width="300" height="300" alt="微信支付" />
 <img src="https://daihaorui.oss-cn-hangzhou.aliyuncs.com/djangoblog/202405301410904.png"
- width="150" height="150" alt="Alipay QR Code" />
+ width="266" height="300" alt="支付宝支付" />
 </div>
