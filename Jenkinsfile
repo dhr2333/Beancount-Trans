@@ -40,7 +40,7 @@ pipeline {
             steps {
                 sh '''
                     npm install
-                    npm ci
+                    # npm ci
                 '''
             }
         }
