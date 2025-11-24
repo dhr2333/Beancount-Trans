@@ -221,22 +221,46 @@ function commitAndPushToSubmodule(version: string, releaseDate: string): void {
     // 进入 Docs 目录
     process.chdir(docsDir);
 
-    // 先尝试添加文件，然后检查是否有 staged 的更改
-    // 这样可以更准确地检测文件是否真的改变了
+    // 检查文件是否有更改（使用 git diff 直接检查）
     try {
-      execSync(`git add "${relativeChangelogPath}"`, { stdio: 'ignore' });
+      // 先检查工作区是否有更改
+      let hasChanges = false;
+      try {
+        const diff = execSync(`git diff "${relativeChangelogPath}"`, { encoding: 'utf-8' }).trim();
+        if (diff) {
+          hasChanges = true;
+          console.log(`✅ 检测到工作区文件更改: ${relativeChangelogPath}`);
+        }
+      } catch (error) {
+        // 文件可能是新文件，检查是否在 Git 中
+        try {
+          execSync(`git ls-files --error-unmatch "${relativeChangelogPath}"`, { stdio: 'ignore' });
+          // 文件在 Git 中，但没有 diff，说明没有更改
+        } catch {
+          // 文件不在 Git 中，是新文件，有更改
+          hasChanges = true;
+          console.log(`✅ 检测到新文件: ${relativeChangelogPath}`);
+        }
+      }
       
-      // 检查是否有 staged 的更改
-      const diffCached = execSync('git diff --cached --name-only', { encoding: 'utf-8' }).trim();
-      if (!diffCached.includes(relativeChangelogPath)) {
+      if (!hasChanges) {
         console.log('📝 文件未更改，跳过提交');
-        // 重置暂存区
-        execSync('git reset', { stdio: 'ignore' });
         return;
       }
-      console.log(`✅ 检测到文件更改: ${relativeChangelogPath}`);
+      
+      // 添加文件到暂存区
+      execSync(`git add "${relativeChangelogPath}"`, { stdio: 'inherit' });
+      console.log(`✅ 已添加文件到暂存区: ${relativeChangelogPath}`);
     } catch (error) {
       console.warn('警告: 无法检查文件更改状态，继续尝试提交');
+      // 即使检查失败，也尝试添加文件
+      try {
+        execSync(`git add "${relativeChangelogPath}"`, { stdio: 'inherit' });
+        console.log(`✅ 已添加文件到暂存区: ${relativeChangelogPath}`);
+      } catch (addError) {
+        console.error('错误: 无法添加文件到暂存区');
+        throw addError;
+      }
     }
 
     // 配置 Git（如果还没有配置）
@@ -257,19 +281,7 @@ function commitAndPushToSubmodule(version: string, releaseDate: string): void {
     }
 
     // 文件已经在上面添加过了，这里只需要确认
-    // 如果上面的检查已经添加了文件，这里就不需要再次添加
-    try {
-      const diffCached = execSync('git diff --cached --name-only', { encoding: 'utf-8' }).trim();
-      if (!diffCached.includes(relativeChangelogPath)) {
-        // 如果文件不在暂存区，再次添加
-        execSync(`git add "${relativeChangelogPath}"`, { stdio: 'inherit' });
-      }
-      console.log(`✅ 文件已在暂存区: ${relativeChangelogPath}`);
-    } catch (error) {
-      // 如果检查失败，直接添加
-      execSync(`git add "${relativeChangelogPath}"`, { stdio: 'inherit' });
-      console.log(`✅ 已添加文件到暂存区: ${relativeChangelogPath}`);
-    }
+    console.log(`✅ 文件已在暂存区: ${relativeChangelogPath}`);
 
     // 提交更改
     const commitMessage = `docs: update changelog for v${version} (${releaseDate})`;
