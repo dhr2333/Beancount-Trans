@@ -222,7 +222,7 @@ Backend → Fava Container → Beancount-Trans-Assets/
 ### 项目文档
 
 - **用户文档**：`Beancount-Trans-Docs/docs/` - 面向最终用户的使用指南
-- **API 文档**：由后端自动生成，部署后访问 `/api/redoc/` 或 `/api/swagger/`
+- **API 文档**：由后端自动生成，部署后通过 `/api/redoc/` 访问OpenAPI文档
 - **开发文档**：各子模块的 `README.md` 和 `docs/` 目录
 
 ### 文档更新
@@ -240,12 +240,83 @@ Backend → Fava Container → Beancount-Trans-Assets/
 - **次版本号**：向后兼容的功能新增
 - **修订号**：向后兼容的问题修复
 
+### 提交信息规范
+
+项目使用 [Conventional Commits](https://www.conventionalcommits.org/) 规范，提交信息格式为：
+
+```text
+<type>(<scope>): <subject>
+
+<body>
+
+<footer>
+```
+
+#### 触发发布的提交类型
+
+以下提交类型会触发 Semantic Release 自动发布：
+
+- **`feat!` 或 `feat(<scope>)!`**：触发主版本号更新（MAJOR）- 破坏性变更
+- **`feat` 或 `feat(<scope>)`**：触发次版本号更新（MINOR）- 新功能
+- **`fix` 或 `fix(<scope>)`**：触发修订版本号更新（PATCH）- Bug 修复
+
+示例：
+```text
+feat!: 添加破坏性变更的功能
+feat(api)!: 移除旧API
+feat: 添加新功能
+feat(auth): 添加用户认证
+fix: 修复bug
+fix(login): 修复登录失败问题
+```
+
+#### 不触发发布的提交类型
+
+以下提交类型不会触发发布，但会包含在 CHANGELOG 中：
+
+- **`docs`**：文档更新
+- **`style`**：代码风格调整（格式化、空格等）
+- **`refactor`**：代码重构（不改变功能）
+- **`perf`**：性能优化
+- **`test`**：测试相关（添加或修改测试）
+- **`chore`**：构建过程或辅助工具变动（包括依赖更新）
+
+示例：
+```text
+docs: 更新API文档
+docs(readme): 添加安装说明
+style: 格式化代码
+style(button): 调整按钮样式
+refactor: 代码重构
+refactor(utils): 优化工具函数
+perf: 性能优化
+perf(render): 优化渲染性能
+test: 添加测试用例
+test(login): 增加登录测试
+chore: 构建过程或辅助工具变动
+chore(deps): 更新依赖包
+```
+
+### 分支规范
+
+- **主分支**：`main` - 用于生产环境，受 Semantic Release 保护
+- **功能分支**：`feat/<feature-name>` - 新功能开发
+- **修复分支**：`fix/<bug-name>` - Bug 修复
+- **发布分支**：由 Semantic Release 自动管理
+
 ### 版本位置
 
 - **后端**：`Beancount-Trans-Backend/pyproject.toml`、`requirements.txt`
 - **前端**：`Beancount-Trans-Frontend/package.json`
 - **主仓库**：通过 Semantic Release 管理，基于 Git 标签
 
+### Semantic Release 发布流程
+
+1. 在 `main` 分支提交符合规范的提交信息
+2. Semantic Release 自动分析提交并确定版本号
+3. 自动生成 CHANGELOG 和 Git 标签
+4. 自动创建 GitHub Release
+
 ### 发布说明
 
-每个版本更新应在 `CHANGELOG.md` 中记录变更内容（各子模块独立维护）。
+每个版本更新应在 `CHANGELOG.md` 中记录变更内容（各子模块独立维护，由 Semantic Release 自动生成）。
