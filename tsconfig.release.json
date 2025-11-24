@@ -9,6 +9,5 @@
     "strict": false,
     "skipLibCheck": true
   },
-  "include": ["release.config.ts"]
+  "include": ["release.config.ts", "scripts/**/*.ts"]
 }
-
