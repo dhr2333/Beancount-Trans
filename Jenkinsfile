@@ -39,7 +39,6 @@ pipeline {
         stage('安装依赖') {
             steps {
                 sh '''
-                    npm install
                     npm ci
                 '''
             }
