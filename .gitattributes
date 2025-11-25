@@ -1,1 +1,4 @@
 docker-compose.yaml merge=ours
+
+# 明确指定 TypeScript 文件类型
+scripts/write-changelog-to-docs.ts linguist-language=TypeScript
