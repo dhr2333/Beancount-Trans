@@ -87,6 +87,7 @@ git submodule update --init --recursive  # 递归初始化嵌套子模块
 ### 子模块开发流程
 
 1. **在主仓库中更新子模块引用**：
+
    ```bash
    cd Beancount-Trans-Frontend
    git checkout main
@@ -134,6 +135,7 @@ git submodule update --init --recursive  # 递归初始化嵌套子模块
 ### 环境变量
 
 所有配置通过环境变量注入，参考各子模块的文档：
+
 - 后端：`Beancount-Trans-Backend/docs/ENV_CONFIG.md`
 - 根目录：`docker-compose.yaml` 中的 `environment` 部分
 
@@ -142,6 +144,7 @@ git submodule update --init --recursive  # 递归初始化嵌套子模块
 ### 本地开发环境
 
 1. **克隆项目**：
+
    ```bash
    git clone https://github.com/dhr2333/Beancount-Trans.git
    cd Beancount-Trans
@@ -185,6 +188,7 @@ git submodule update --init --recursive  # 递归初始化嵌套子模块
 ### 子模块 CI
 
 每个子模块有独立的 `Jenkinsfile`：
+
 - **后端**：`Beancount-Trans-Backend/Jenkinsfile` - 运行测试、构建 Docker 镜像
 - **前端**：`Beancount-Trans-Frontend/Jenkinsfile` - 构建静态文件、构建 Docker 镜像
 - **文档**：`Beancount-Trans-Docs/Jenkinsfile` - 构建和部署文档站点
@@ -211,7 +215,7 @@ git submodule update --init --recursive  # 递归初始化嵌套子模块
 
 ### 依赖关系
 
-```
+```text
 Frontend → Backend API → Database/Redis/MinIO
 Backend → Celery Worker → File System/MinIO
 Backend → Fava Container → Beancount-Trans-Assets/
@@ -236,6 +240,7 @@ Backend → Fava Container → Beancount-Trans-Assets/
 ### 版本号格式
 
 遵循 [Semantic Versioning](https://semver.org/)：
+
 - **主版本号**：不兼容的 API 变更
 - **次版本号**：向后兼容的功能新增
 - **修订号**：向后兼容的问题修复
@@ -261,6 +266,7 @@ Backend → Fava Container → Beancount-Trans-Assets/
 - **`fix` 或 `fix(<scope>)`**：触发修订版本号更新（PATCH）- Bug 修复
 
 示例：
+
 ```text
 feat!: 添加破坏性变更的功能
 feat(api)!: 移除旧API
@@ -282,6 +288,7 @@ fix(login): 修复登录失败问题
 - **`chore`**：构建过程或辅助工具变动（包括依赖更新）
 
 示例：
+
 ```text
 docs: 更新API文档
 docs(readme): 添加安装说明
