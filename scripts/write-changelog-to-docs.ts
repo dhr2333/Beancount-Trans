@@ -5,10 +5,11 @@
  * 
  * 使用方法：
  * node --loader ts-node/esm scripts/write-changelog-to-docs.ts <version> <notes> [date]
+ * node --loader ts-node/esm scripts/write-changelog-to-docs.ts --unreleased
  * 
  * 参数：
- * - version: 版本号，如 "1.0.0"
- * - notes: Release Notes (Markdown 格式)
+ * - version: 版本号，如 "1.0.0"，或 "--unreleased" 表示未发布版本
+ * - notes: Release Notes (Markdown 格式)，当使用 --unreleased 时不需要
  * - date: 发布日期（可选），如 "2025-11-15"
  */
 
@@ -24,23 +25,33 @@ const __dirname = dirname(__filename);
 // 获取命令行参数
 const [version, notes, date] = process.argv.slice(2);
 
-if (!version || !notes) {
+// 检查是否是未发布模式
+const isUnreleased = version === '--unreleased';
+
+if (!isUnreleased && (!version || !notes)) {
   console.error('错误: 缺少必需参数');
   console.error('使用方法: node --loader ts-node/esm scripts/write-changelog-to-docs.ts <version> <notes> [date]');
+  console.error('或: node --loader ts-node/esm scripts/write-changelog-to-docs.ts --unreleased');
   process.exit(1);
 }
 
 // 如果没有提供日期，尝试从 notes 中提取，或者使用当前日期
 let releaseDate: string = date || '';
 if (!releaseDate || releaseDate.trim() === '') {
-  // 尝试从 notes 中提取日期（格式：## [version](url) (YYYY-MM-DD)）
-  const dateMatch = notes.match(/\((\d{4}-\d{2}-\d{2})\)/);
-  if (dateMatch) {
-    releaseDate = dateMatch[1];
-  } else {
-    // 使用当前日期
+  if (isUnreleased) {
+    // 未发布模式，使用当前日期
     const now = new Date();
     releaseDate = now.toISOString().split('T')[0];
+  } else {
+    // 尝试从 notes 中提取日期（格式：## [version](url) (YYYY-MM-DD)）
+    const dateMatch = notes.match(/\((\d{4}-\d{2}-\d{2})\)/);
+    if (dateMatch) {
+      releaseDate = dateMatch[1];
+    } else {
+      // 使用当前日期
+      const now = new Date();
+      releaseDate = now.toISOString().split('T')[0];
+    }
   }
 }
 
@@ -181,12 +192,133 @@ function readExistingChangelog(): string {
 }
 
 /**
+ * 从 git 提交历史中提取未发布的提交
+ */
+function getUnreleasedCommits(): string {
+  try {
+    // 获取最新的版本标签
+    let lastTag: string;
+    try {
+      lastTag = execSync('git describe --tags --abbrev=0', { encoding: 'utf-8' }).trim();
+    } catch {
+      // 如果没有标签，从初始提交开始
+      lastTag = execSync('git rev-list --max-parents=0 HEAD', { encoding: 'utf-8' }).trim();
+    }
+
+    // 获取自上次发布以来的提交（包含 hash、subject 和 body）
+    const commitsOutput = execSync(
+      `git log ${lastTag}..HEAD --pretty=format:"%H|%s|%b" --no-merges`,
+      { encoding: 'utf-8' }
+    ).trim();
+
+    if (!commitsOutput) {
+      return '';
+    }
+
+    // 解析提交并按类型分类
+    const commitLines = commitsOutput.split('\n').filter(line => line.trim());
+    const categorized: Record<string, string[]> = {};
+
+    for (const line of commitLines) {
+      const parts = line.split('|');
+      const hash = parts[0] || '';
+      const subject = parts[1] || '';
+      const body = parts.slice(2).join('|').trim();
+
+      // 解析 Conventional Commits 格式
+      const match = subject.match(/^(\w+)(?:\(([^)]+)\))?(!)?:\s*(.+)$/);
+      if (match) {
+        const [, type, scope, breaking, description] = match;
+        // 将类型映射到标准分类
+        let category: string;
+        if (breaking) {
+          category = 'BREAKING CHANGES';
+        } else {
+          // 类型映射
+          const typeMap: Record<string, string> = {
+            'feat': 'Features',
+            'fix': 'Bug Fixes',
+            'docs': 'Documentation',
+            'style': 'Style',
+            'refactor': 'Refactor',
+            'perf': 'Performance',
+            'test': 'Test',
+            'chore': 'Chore'
+          };
+          category = typeMap[type.toLowerCase()] || 'Chore';
+        }
+
+        if (!categorized[category]) {
+          categorized[category] = [];
+        }
+
+        const shortHash = hash.substring(0, 7);
+        const link = hash
+          ? `([${shortHash}](https://github.com/dhr2333/Beancount-Trans/commit/${hash}))`
+          : '';
+
+        categorized[category].push(`* ${description} ${link}`);
+      } else {
+        // 不符合 Conventional Commits 格式的提交
+        if (!categorized['Chore']) {
+          categorized['Chore'] = [];
+        }
+        const shortHash = hash.substring(0, 7);
+        const link = hash
+          ? `([${shortHash}](https://github.com/dhr2333/Beancount-Trans/commit/${hash}))`
+          : '';
+        categorized['Chore'].push(`* ${subject} ${link}`);
+      }
+    }
+
+    // 生成格式化的 notes
+    const result: string[] = [];
+    const categoryOrder = ['BREAKING CHANGES', 'Features', 'Bug Fixes', 'Documentation', 'Performance', 'Refactor', 'Style', 'Test', 'Chore'];
+
+    for (const category of categoryOrder) {
+      if (categorized[category] && categorized[category].length > 0) {
+        const translatedCategory = translateCategory(category);
+        result.push(`### ${translatedCategory}`);
+        result.push('');
+        result.push(...categorized[category]);
+        result.push('');
+      }
+    }
+
+    // 处理其他未分类的提交
+    for (const [category, items] of Object.entries(categorized)) {
+      if (!categoryOrder.includes(category)) {
+        const translatedCategory = translateCategory(category);
+        result.push(`### ${translatedCategory}`);
+        result.push('');
+        result.push(...items);
+        result.push('');
+      }
+    }
+
+    return result.join('\n');
+  } catch (error) {
+    const err = error as Error;
+    console.error(`错误: 无法获取 git 提交历史:`, err.message);
+    return '';
+  }
+}
+
+/**
  * 生成新版本的内容
  */
 function generateVersionSection(version: string, notes: string, releaseDate: string): string {
-  const formattedNotes = parseAndFormatNotes(notes);
+  let formattedNotes: string;
   
-  const section = `## v${version} (${releaseDate})
+  if (version === '--unreleased' || version === 'unreleased') {
+    // 未发布模式，从 git 提交历史提取
+    formattedNotes = getUnreleasedCommits();
+    if (!formattedNotes || formattedNotes.trim() === '') {
+      console.log('📝 没有未发布的提交，跳过更新日志');
+      return '';
+    }
+    
+    const section = `## 未发布更改 (${releaseDate})
 
 ${formattedNotes}
 
@@ -194,7 +326,21 @@ ${formattedNotes}
 
 `;
 
-  return section;
+    return section;
+  } else {
+    // 正常发布模式
+    formattedNotes = parseAndFormatNotes(notes);
+    
+    const section = `## v${version} (${releaseDate})
+
+${formattedNotes}
+
+---
+
+`;
+
+    return section;
+  }
 }
 
 /**
@@ -284,7 +430,9 @@ function commitAndPushToSubmodule(version: string, releaseDate: string): void {
     console.log(`✅ 文件已在暂存区: ${relativeChangelogPath}`);
 
     // 提交更改
-    const commitMessage = `docs: update changelog for v${version} (${releaseDate})`;
+    const commitMessage = version === 'unreleased' 
+      ? `docs: update changelog for unreleased changes (${releaseDate})`
+      : `docs: update changelog for v${version} (${releaseDate})`;
     execSync(`git commit -m "${commitMessage}"`, { stdio: 'inherit' });
     console.log(`✅ 已提交到 Docs 子仓库`);
 
@@ -348,13 +496,21 @@ function commitAndPushToSubmodule(version: string, releaseDate: string): void {
  * 主函数
  */
 function main(): void {
-  console.log(`正在更新版本日志: v${version} (${releaseDate})`);
+  const displayVersion = isUnreleased ? '未发布更改' : `v${version}`;
+  console.log(`正在更新版本日志: ${displayVersion} (${releaseDate})`);
 
   // 读取现有内容
   const existingContent = readExistingChangelog();
 
   // 生成新版本内容
-  const newSection = generateVersionSection(version, notes, releaseDate);
+  const actualNotes = isUnreleased ? '' : notes;
+  const newSection = generateVersionSection(version, actualNotes, releaseDate);
+
+  // 如果没有内容（未发布且没有提交），直接返回
+  if (!newSection || newSection.trim() === '') {
+    console.log('📝 没有内容需要更新，跳过');
+    return;
+  }
 
   // 如果文件只有标题，直接追加
   // 否则在标题后插入新版本
@@ -384,7 +540,8 @@ function main(): void {
 
   // 提交并推送到 Docs 子仓库
   console.log('\n📦 开始提交到 Docs 子仓库...');
-  commitAndPushToSubmodule(version, releaseDate);
+  const commitVersion = isUnreleased ? 'unreleased' : version;
+  commitAndPushToSubmodule(commitVersion, releaseDate);
 }
 
 // 执行主函数
