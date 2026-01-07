@@ -1,5 +1,3 @@
-version: "3"
-
 services:
   beancount-trans-frontend:
     image: dhr2333/beancount-trans-frontend:latest

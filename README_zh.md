@@ -25,13 +25,13 @@ Beancount-Trans 是一款（自托管）智能账单转换平台，帮助用户�
 ### 🚀 核心特性
 
 - 🔐 **自托管支持**：完整开源，支持私有化部署
+- 📋 **模板账本**：遵循复式记账最佳实践
+- 📱 **随时随地访问**：随时查看财务数据
+- 📊 **财务报表服务**：自动生成专业财务报表
 - 🧠 **AI 智能解析**：使用 DeepSeek 等 AI 技术自动识别交易类别
 - 🔒 **容器化隔离**：每个用户拥有独立的财务环境
 - 🔑 **双因素认证 (2FA)**：增强账户安全
-- 📱 **随时随地访问**：随时查看财务数据
 - 📁 **账单文件管理**：支持 CSV/PDF/Excel 等常见账单格式
-- 📊 **财务报表服务**：自动生成专业财务报表
-- ⚡ **异步处理**：账单上传后可选批量处理，快速生成报表
 
 ## 🛠️ 技术架构
 
@@ -164,7 +164,8 @@ sequenceDiagram
 ```shell
 git clone https://github.com/dhr2333/Beancount-Trans.git
 cd Beancount-Trans;
-git submodule update --init  # 初始化所有子模块
+git submodule update --init --recursive  # 初始化所有子模块
+git submodule foreach git switch main  # 子模块切换到 main 分支
 ```
 
 #### 首次运行
@@ -212,15 +213,15 @@ volumes:
 
 - 🐛 [报告问题](https://github.com/dhr2333/Beancount-Trans/issues)
 - 💬 [讨论区](https://github.com/dhr2333/Beancount-Trans/discussions)
+- 📧 [支持邮箱](mailto:dhr2diary@gmail.com)
 - 🐧 [QQ群](https://qm.qq.com/q/W1hsFN6fGq)
 <img src="https://daihaorui.oss-cn-hangzhou.aliyuncs.com/djangoblog/202508251100915.jpg" style="width:428px; height:763px;" alt="Beancount-Trans QQ群" />
-- 📧 [支持邮箱](mailto:dai_haorui@163.com)
 
-## ❤️ 支持我们
+## ❤️ 支持我
 
 捐赠收入将全部用于提高 [平台](https://trans.dhr2333.cn/) 解析速度
 
-微信支持标签解析，备注可添加后缀 `#TEST`
+微信支付，备注可添加后缀 `#TEST` 为解析记录增加标签
 
 支付宝支持信用卡及花呗支付
 
