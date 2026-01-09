@@ -110,7 +110,7 @@ function parseAndFormatNotes(notes: string): string {
 
   // 按行分割
   let lines = processedNotes.split('\n');
-  
+
   // 移除开头的版本链接行（格式：## [version](url) (date)）
   // 这行是 semantic-release 自动添加的，我们不需要它
   if (lines.length > 0 && lines[0].match(/^##\s+\[.+\]\(.+\)\s+\(.+\)$/)) {
@@ -127,7 +127,7 @@ function parseAndFormatNotes(notes: string): string {
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i].trim();
-    
+
     // 跳过空行（但保留列表后的空行）
     if (line === '') {
       if (inList) {
@@ -309,7 +309,7 @@ function getUnreleasedCommits(): string {
  */
 function generateVersionSection(version: string, notes: string, releaseDate: string): string {
   let formattedNotes: string;
-  
+
   if (version === '--unreleased' || version === 'unreleased') {
     // 未发布模式，从 git 提交历史提取
     formattedNotes = getUnreleasedCommits();
@@ -317,7 +317,7 @@ function generateVersionSection(version: string, notes: string, releaseDate: str
       console.log('📝 没有未发布的提交，跳过更新日志');
       return '';
     }
-    
+
     const section = `## 未发布更改 (${releaseDate})
 
 ${formattedNotes}
@@ -330,7 +330,7 @@ ${formattedNotes}
   } else {
     // 正常发布模式
     formattedNotes = parseAndFormatNotes(notes);
-    
+
     const section = `## v${version} (${releaseDate})
 
 ${formattedNotes}
@@ -407,7 +407,7 @@ function commitAndPushToSubmodule(version: string, releaseDate: string): void {
       // 如果不在 main 分支，需要切换
       if (currentBranch !== 'main') {
         console.log(`📌 当前不在 main 分支 (${currentBranch || 'detached HEAD'})，切换到 main 分支...`);
-        
+
         // 先暂存或保存更改（使用 stash 保存工作区更改）
         try {
           // 先添加文件到暂存区

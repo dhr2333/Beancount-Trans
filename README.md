@@ -67,13 +67,13 @@ sequenceDiagram
     participant FavaContainer
     participant FileSystem
     participant ScheduledTask
-    
+
     User->>Frontend: 1. Upload Bill File
     Frontend->>Backend: Send File
     Backend->>MinIO: Store Original File
     Backend->>FileSystem: Create Same Name .bean File
     Backend->>PostgreSQL: Record Upload Information
-    
+
     User->>Frontend: 2. Submit Batch Parsing
     Frontend->>Backend: Submit Parsing Request
     Backend->>Celery: Create Task
@@ -86,13 +86,13 @@ sequenceDiagram
     end
     Worker->>FileSystem: Store Parsing Results (.bean)
     Backend-->>Frontend: Return Task ID
-    
+
     loop Status Polling
         User->>Frontend: Check Progress
         Frontend->>Backend: Query Task Status
         Backend-->>Frontend: Return Progress
     end
-    
+
     User->>Frontend: 3. Access "Platform Ledger"
     Frontend->>Backend: GET /api/fava
     alt Container Exists
@@ -103,7 +103,7 @@ sequenceDiagram
     Backend-->>Frontend: Return Ledger URL
     Frontend->>FavaContainer: Redirect
     FavaContainer-->>User: Display Reports
-    
+
     rect rgba(0, 255, 0, 0.1)
         ScheduledTask->>Backend: Trigger Every Minute
         Backend->>FavaContainer: Check Last Access Time
@@ -164,7 +164,8 @@ Just 3 steps from bill upload to financial report generation:
 ```shell
 git clone https://github.com/dhr2333/Beancount-Trans.git
 cd Beancount-Trans;
-git submodule update --init  # Initialize all submodules
+git submodule update --init --recursive  # Initialize all submodules
+git submodule foreach git switch main  # Switch submodules to main branch
 ```
 
 #### First Run
