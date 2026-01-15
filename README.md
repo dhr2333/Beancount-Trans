@@ -144,7 +144,7 @@ Just 3 steps from bill upload to financial report generation:
     uuid: "2018011921001004560568228384"
     status: "ALiPay - 交易成功"
     Expenses:Culture 128.00 CNY
-    Liabilities:CreditCard:Web:AliPay -128.00 CNY
+    Assets:Savings:Web:AliFund -128.00 CNY
 ```
 
 #### Step 3: Access Financial Reports
