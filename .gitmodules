@@ -13,3 +13,6 @@
 [submodule "Beancount-Trans-Docs"]
 	path = Beancount-Trans-Docs
 	url = https://github.com/dhr2333/Beancount-Trans-Docs.git
+[submodule "Beancount-Trans-Android"]
+	path = Beancount-Trans-Android
+	url = https://github.com/dhr2333/Beancount-Trans-Android.git
