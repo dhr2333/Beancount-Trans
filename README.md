@@ -19,6 +19,7 @@ Enable ordinary users without accounting knowledge to easily use professional-le
 
 - **Zero Barrier to Use**: No accounting knowledge or technical background required
 - **One-Click Reporting**: Get complete financial reports with just your bills
+- **Accurate Assets**: Reflects actual account balances; the ledger is accurate.
 - **Smart Categorization**: AI-powered transaction category recognition
 - **Privacy First**: Complete user data isolation to ensure privacy
 
