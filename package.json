@@ -1,6 +1,6 @@
 {
   "name": "beancount-trans",
-  "version": "0.0.0-development",
+  "version": "5.7.0",
   "description": "Semantic release root workspace for Beancount-Trans monorepo",
   "private": true,
   "type": "module",
