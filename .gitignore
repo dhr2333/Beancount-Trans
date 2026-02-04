@@ -11,3 +11,4 @@ build
 coverage
 .DS_Store
 .cursor/debug.log
+.cursor/.obsidian/
