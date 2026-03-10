@@ -207,7 +207,7 @@ volumes:
 - [Cloud Platform User Manual](https://trans.dhr2333.cn/docs/quick-start/)
 - [Beancount Getting Started](https://www.dhr2333.cn/article/2022/9/10/51.html)
 - [Deployment Guide](https://trans.dhr2333.cn/docs/%E8%87%AA%E6%89%98%E7%AE%A1/deploy)
-- [API Documentation](https://trans.dhr2333.cn/api/redoc/)
+- [API Documentation](https://trans.dhr2333.cn/api/docs/)
 - [Knowledge Base/Wiki](https://www.dhr2333.cn/category/beancountfu-shi-ji-zhang.html)
 
 ## 👥 Community & Support
