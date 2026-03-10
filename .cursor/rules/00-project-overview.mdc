@@ -226,7 +226,7 @@ Backend → Fava Container → Beancount-Trans-Assets/
 ### 项目文档
 
 - **用户文档**：`Beancount-Trans-Docs/docs/` - 面向最终用户的使用指南
-- **API 文档**：由后端自动生成，部署后通过 `/api/redoc/` 访问OpenAPI文档
+- **API 文档**：由后端自动生成，部署后通过 `/api/docs/` 访问 OpenAPI 文档
 - **开发文档**：各子模块的 `README.md` 和 `docs/` 目录
 
 ### 文档更新

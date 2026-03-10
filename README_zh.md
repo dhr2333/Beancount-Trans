@@ -207,7 +207,7 @@ volumes:
 - [云平台用户手册](https://trans.dhr2333.cn/docs/quick-start/)
 - [Beancount 入门](https://www.dhr2333.cn/article/2022/9/10/51.html)
 - [部署指南](https://trans.dhr2333.cn/docs/%E8%87%AA%E6%89%98%E7%AE%A1/deploy)
-- [API 文档](https://trans.dhr2333.cn/api/redoc/)
+- [API 文档](https://trans.dhr2333.cn/api/docs/)
 - [知识库/维基](https://www.dhr2333.cn/category/beancountfu-shi-ji-zhang.html)
 
 ## 👥 社区与支持
