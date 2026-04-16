@@ -1,82 +1,208 @@
+# Beancount-Trans 自托管 Docker Compose
+# 使用前请先复制环境变量: cp .env.example .env
+
 services:
+  # ===== 前端 (Nginx) =====
   beancount-trans-frontend:
     image: dhr2333/beancount-trans-frontend:latest
-    # build:
-    #   context: ./Beancount-Trans-Frontend
-    #   dockerfile: Dockerfile
-    #   args:
-    #     - "--no-cache"
     container_name: beancount-trans-frontend
     restart: always
     ports:
       - "38001:80"
     volumes:
-      - ./collectstatic:/code/beancount-trans/collectstatic
+      - collectstatic:/code/beancount-trans/collectstatic
     depends_on:
-      - beancount-trans-backend
+      beancount-trans-backend:
+        condition: service_started
+
+  # ===== 后端 (Django + uWSGI) =====
   beancount-trans-backend:
-    tty: true
     image: dhr2333/beancount-trans-backend:latest
-    # build:
-    #   context: ./Beancount-Trans-Backend
-    #   dockerfile: Dockerfile-Backend
-    #   args:
-    #     - "--no-cache"
     container_name: beancount-trans-backend
-    restart: always
-    command: bash -c 'sh /code/beancount-trans/bin/docker_start.sh'
     # ports:
-    #   - "38000:8000"
+    #   - "38002:8000"
+    restart: always
+    command: >
+      bash -c "
+        cd /code/beancount-trans &&
+        python manage.py migrate --noinput &&
+        sh /code/beancount-trans/bin/docker_start.sh
+      "
+    env_file: .env
     volumes:
-      - ./Beancount-Trans-Assets:/code/Beancount-Trans-Assets
-      - ./collectstatic:/code/beancount-trans/collectstatic
-    environment:
-      - TRANS_MYSQL_DATABASE=beancount-trans
-      - TRANS_MYSQL_USER=root
-      - TRANS_MYSQL_PASSWORD=root
-      - TRANS_MYSQL_HOST=beancount-trans-postgres
-      - TRANS_MYSQL_PORT=5432
-      - TRANS_REDIS_URL=redis://beancount-trans-redis:6379/
-      - TRANS_REDIS_PASSWORD=root
+      # 与容器内 Django ASSETS_BASE_PATH 一致；解析产物写入 Assets/<用户名>/（如 admin → ./Beancount-Trans-Backend/Assets/admin）
+      - ./Beancount-Trans-Backend/Assets:/code/beancount-trans/Assets
+      - collectstatic:/code/beancount-trans/collectstatic
+      - /var/run/docker.sock:/var/run/docker.sock:ro
     depends_on:
-      - beancount-trans-postgres
-      - beancount-trans-redis
+      beancount-trans-postgres:
+        condition: service_healthy
+      beancount-trans-redis:
+        condition: service_healthy
+
+  # ===== Celery Worker（异步任务：账单解析等）=====
+  beancount-trans-worker:
+    image: dhr2333/beancount-trans-backend:latest
+    container_name: beancount-trans-worker
+    restart: always
+    command: >
+      bash -c "
+        cd /code/beancount-trans &&
+        celery -A project worker --loglevel=info --concurrency=2
+      "
+    env_file: .env
+    volumes:
+      # 与 backend 相同挂载，解析任务写入 Assets/<用户名>/
+      - ./Beancount-Trans-Backend/Assets:/code/beancount-trans/Assets
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    depends_on:
+      beancount-trans-postgres:
+        condition: service_healthy
+      beancount-trans-redis:
+        condition: service_healthy
+
+  # ===== Celery Beat（定时任务：清理过期容器等）=====
+  beancount-trans-beat:
+    image: dhr2333/beancount-trans-backend:latest
+    container_name: beancount-trans-beat
+    restart: always
+    command: >
+      bash -c "
+        cd /code/beancount-trans &&
+        celery -A project beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+      "
+    env_file: .env
+    depends_on:
+      beancount-trans-postgres:
+        condition: service_healthy
+      beancount-trans-redis:
+        condition: service_healthy
+
+  # ===== PostgreSQL =====
   beancount-trans-postgres:
-    image: dhr2333/beancount-trans-postgres:latest
+    image: docker.io/library/postgres:18.3-alpine
     container_name: beancount-trans-postgres
     restart: always
     ports:
-      - "35432:5432"
+      - "65432:5432"
     environment:
-      - POSTGRES_DB=postgres
-      - POSTGRES_USER=root
-      - POSTGRES_PASSWORD=root
+      - POSTGRES_DB=${TRANS_POSTGRESQL_DATABASE:-beancount-trans}
+      - POSTGRES_USER=${TRANS_POSTGRESQL_USER:-root}
+      - POSTGRES_PASSWORD=${TRANS_POSTGRESQL_PASSWORD:-root}
     volumes:
-      - "postgres:/var/lib/postgresql/data"
+      - postgres:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -d ${TRANS_POSTGRESQL_DATABASE:-beancount-trans} -U ${TRANS_POSTGRESQL_USER:-root}",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ===== Redis =====
   beancount-trans-redis:
-    image: dhr2333/beancount-trans-redis:latest
+    image: docker.io/library/redis:8.6.1-alpine
     container_name: beancount-trans-redis
     restart: always
-    ports:
-      - "36379:6379"
+    # ports:
+    #   - "36379:6379"
+    command: >
+      redis-server
+      --requirepass ${TRANS_REDIS_PASSWORD:-root}
+      --appendonly yes
+      --bind 0.0.0.0
+      --protected-mode no
+      --maxmemory 256mb
+      --maxmemory-policy allkeys-lru
     volumes:
-      - ./conf/redis.conf:/etc/redis/redis.conf
       - redis:/data
-    command: redis-server /etc/redis/redis.conf --appendonly yes
-  beancount-trans-assets:
-    image: dhr2333/beancount-trans-assets:latest
-    container_name: beancount-trans-assets
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${TRANS_REDIS_PASSWORD:-root}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ===== MinIO 对象存储 =====
+  beancount-trans-minio:
+    image: docker.io/minio/minio:latest
+    container_name: beancount-trans-minio
     restart: always
     ports:
-      - "5000:5000"
+      - "39000:9000"
+      - "39001:9001"
+    environment:
+      - MINIO_ROOT_USER=${MINIO_ACCESS_KEY:-minioadmin}
+      - MINIO_ROOT_PASSWORD=${MINIO_SECRET_KEY:-minioadmin}
+    command: server /data --console-address ":9001"
     volumes:
-      - ./Beancount-Trans-Assets:/Assets
+      - minio:/data
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "curl -f http://localhost:9000/minio/health/live || exit 1",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # MinIO 初始化：自动创建存储桶
+  beancount-trans-minio-init:
+    image: docker.io/minio/mc:latest
+    container_name: beancount-trans-minio-init
+    restart: "no"
+    entrypoint: >
+      /bin/sh -c "
+        until mc alias set myminio http://beancount-trans-minio:9000 $${MINIO_ACCESS_KEY} $${MINIO_SECRET_KEY} 2>/dev/null; do
+          echo 'Waiting for MinIO...';
+          sleep 2;
+        done;
+        mc mb myminio/$${MINIO_BUCKET_NAME} --ignore-existing;
+        echo 'Bucket ready.';
+      "
+    environment:
+      - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY:-minioadmin}
+      - MINIO_SECRET_KEY=${MINIO_SECRET_KEY:-minioadmin}
+      - MINIO_BUCKET_NAME=${MINIO_BUCKET_NAME:-beancount-trans}
+    depends_on:
+      beancount-trans-minio:
+        condition: service_healthy
+
+  # ===== Fava 静态实例（profile fava-family），单用户 MVP 示例：admin =====
+  # 须与 backend/worker 写入的 Assets/<用户名> 为同一宿主机目录（此处 admin → ./Beancount-Trans-Backend/Assets/admin）
+  # 默认不参与 docker compose up；启动：docker compose --profile fava-family up -d
+  # .env 中 FAVA_STATIC_USER_MAP 填写浏览器可打开的 URL（局域网请用宿主机 IP，勿写容器名）
+  # 多用户：复制本服务块并改端口与卷路径，同步扩展 FAVA_STATIC_USER_MAP
+  beancount-trans-fava-admin:
+    profiles: ["fava-family"]
+    image: ${FAVA_IMAGE:-docker.io/dhr2333/beancount-trans-assets:latest}
+    container_name: beancount-trans-fava-admin
+    restart: unless-stopped
+    ports:
+      - "5001:5000"
+    volumes:
+      - ./Beancount-Trans-Backend/Assets/admin:/Assets
     environment:
       - BEANCOUNT_FILE=/Assets/main.bean
+  # beancount-trans-fava-root:
+  #   profiles: ["fava-family"]
+  #   image: ${FAVA_IMAGE:-docker.io/dhr2333/beancount-trans-assets:latest}
+  #   container_name: beancount-trans-fava-root
+  #   restart: unless-stopped
+  #   ports:
+  #     - "5002:5000"
+  #   volumes:
+  #     - ./Beancount-Trans-Backend/Assets/root:/Assets
+  #   environment:
+  #     - BEANCOUNT_FILE=/Assets/main.bean
 volumes:
   redis:
-    # external: true # 若已创建外部存储卷，则取消该注释(多次docker compose up可能会导致存储卷重复创建导致启动失败)
-    name: redis-data
+    name: beancount-trans-redis-data
   postgres:
-    # external: true # 若已创建外部存储卷，则取消该注释
-    name: postgres-data
+    name: beancount-trans-postgres-data
+  minio:
+    name: beancount-trans-minio-data
+  collectstatic:
+    name: beancount-trans-collectstatic
