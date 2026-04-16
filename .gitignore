@@ -1,6 +1,9 @@
 collectstatic
+.env
 .idea
 .vscode
+.cursor
+.github
 Manjaro.session.sql
 docker-compose-beancount-trans.yaml
 node_modules
