@@ -23,7 +23,7 @@ pipeline {
                     if [ -f $(git rev-parse --git-dir)/shallow ]; then
                         git fetch --unshallow || true
                     fi
-                    # 初始化 Git Submodules（包括 Beancount-Trans-Docs）
+                    # 初始化 Git Submodules
                     git submodule update --init --recursive || true
                 '''
             }
