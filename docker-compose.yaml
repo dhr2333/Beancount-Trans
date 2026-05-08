@@ -41,20 +41,23 @@ services:
         condition: service_healthy
 
   # ===== Celery Worker（异步任务：账单解析等）=====
-  beancount-trans-worker:
+  worker:
     image: dhr2333/beancount-trans-backend:latest
     container_name: beancount-trans-worker
     restart: always
     command: >
       bash -c "
         cd /code/beancount-trans &&
-        celery -A project worker --loglevel=info --concurrency=2
+        celery -A project worker --loglevel=info --concurrency=1
       "
     env_file: .env
+    deploy:
+      replicas: 2
     volumes:
       # 与 backend 相同挂载，解析任务写入 Assets/<用户名>/
       - ./Beancount-Trans-Backend/Assets:/code/beancount-trans/Assets
       - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /root/pretrained_models:/code/beancount-trans/pretrained_models
     depends_on:
       beancount-trans-postgres:
         condition: service_healthy
@@ -83,8 +86,8 @@ services:
     image: docker.io/library/postgres:18.3-alpine
     container_name: beancount-trans-postgres
     restart: always
-    ports:
-      - "65432:5432"
+    # ports:
+    #   - "65432:5432"
     environment:
       - POSTGRES_DB=${TRANS_POSTGRESQL_DATABASE:-beancount-trans}
       - POSTGRES_USER=${TRANS_POSTGRESQL_USER:-root}
