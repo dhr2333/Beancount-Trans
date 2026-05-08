@@ -56,7 +56,7 @@ services:
       # 与 backend 相同挂载，解析任务写入 Assets/<用户名>/
       - ./Beancount-Trans-Backend/Assets:/code/beancount-trans/Assets
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      - /root/pretrained_models:/code/beancount-trans/pretrained_models
+      - ./Beancount-Trans-Backend/pretrained_models:/code/beancount-trans/pretrained_models
     depends_on:
       beancount-trans-postgres:
         condition: service_healthy
@@ -92,7 +92,7 @@ services:
       - POSTGRES_USER=${TRANS_POSTGRESQL_USER:-root}
       - POSTGRES_PASSWORD=${TRANS_POSTGRESQL_PASSWORD:-root}
     volumes:
-      - postgres:/var/lib/postgresql/data
+      - postgres:/var/lib/postgresql/18/docker
     healthcheck:
       test:
         [
@@ -171,7 +171,6 @@ services:
   # .env 中 FAVA_STATIC_USER_MAP 填写浏览器可打开的 URL（局域网请用宿主机 IP，勿写容器名）
   # 多用户：复制本服务块并改端口与卷路径，同步扩展 FAVA_STATIC_USER_MAP
   beancount-trans-fava-admin:
-    profiles: [ "fava-family" ]
     image: ${FAVA_IMAGE:-docker.io/dhr2333/beancount-trans-assets:latest}
     container_name: beancount-trans-fava-admin
     restart: unless-stopped
@@ -182,7 +181,6 @@ services:
     environment:
       - BEANCOUNT_FILE=/Assets/main.bean
   # beancount-trans-fava-root:
-  #   profiles: ["fava-family"]
   #   image: ${FAVA_IMAGE:-docker.io/dhr2333/beancount-trans-assets:latest}
   #   container_name: beancount-trans-fava-root
   #   restart: unless-stopped

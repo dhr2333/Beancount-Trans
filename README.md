@@ -40,7 +40,7 @@
 2. 上传账单并执行解析。
 3. 打开平台账本查看损益表、资产负债表和明细流水。
 
-> 注册用户已包含 [支付宝](https://dl.dhr2333.cn/%E5%AE%8C%E6%95%B4%E6%B5%8B%E8%AF%95_%E6%94%AF%E4%BB%98%E5%AE%9D.csv)/[微信](https://dl.dhr2333.cn/%E5%AE%8C%E6%95%B4%E6%B5%8B%E8%AF%95_%E5%BE%AE%E4%BF%A1.csv) 账单案例
+快速入门教程：[快速入门 | Beancount-Trans](https://trans.dhr2333.cn/docs/%E6%95%99%E7%A8%8B/quick-start)
 
 ### 自托管用户
 
