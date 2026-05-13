@@ -4,7 +4,7 @@
 [![Python Version](https://img.shields.io/badge/python-3.9%2B-blue.svg)](https://www.python.org/)
 [![Docker](https://img.shields.io/badge/docker-available-blue.svg)](https://www.docker.com/)
 
-⚠️ 项目旨在探索 GTD 方法论对财务状况管理的最佳实践，现已完成使命进入维护，不再新增功能，保持稳定运行。项目毕业了，但我的记账生活还在继续——这本身就是最好的成果。
+> **项目旨在探索 GTD 方法论对财务状况管理的最佳实践。**
 
 ## 一句话说明
 
@@ -65,4 +65,3 @@ docker compose up -d
 
 - 报告问题（注意如果要上传账单请抹除隐私信息）：[GitHub Issues](https://github.com/dhr2333/Beancount-Trans/issues)
 - 讨论：[GitHub Discussions](https://github.com/dhr2333/Beancount-Trans/discussions)
-- 联系方式：[dhr2diary@gmail.com](mailto:dhr2diary@gmail.com) 或 **微信**
