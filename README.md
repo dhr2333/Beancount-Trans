@@ -1,10 +1,10 @@
 # Beancount-Trans
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Python Version](https://img.shields.io/badge/python-3.9%2B-blue.svg)](https://www.python.org/)
 [![Docker](https://img.shields.io/badge/docker-available-blue.svg)](https://www.docker.com/)
+[![Awesome Beancount](https://awesome.re/badge.svg)](https://awesome-beancount.com/#china)
 
-> **项目旨在探索 GTD 方法论对财务状况管理的最佳实践。**
+> **项目旨在探索 GTD 方法论对财务状况管理的最佳实践**。现已被 [Awesome Beancount](https://awesome-beancount.com/#china) 官方资源列表收录，成为服务中国区用户的核心工具。
 
 ## 一句话说明
 
