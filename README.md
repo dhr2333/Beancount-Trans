@@ -28,9 +28,9 @@
 
 格式转换页面不保留任何上传的文件及信息，所有可选功能均为解析功能服务。
 
-![Beancount-Trans 解析首页](https://daihaorui.oss-cn-hangzhou.aliyuncs.com/djangoblog/202508191716372.png)
-
 ![云平台用户演示视频](https://daihaorui.oss-cn-hangzhou.aliyuncs.com/djangoblog/202508191544942.gif)
+
+![解析审核](https://daihaorui.oss-cn-hangzhou.aliyuncs.com/djangoblog/202607011123512.gif)
 
 ## 快速开始
 
