@@ -4,18 +4,18 @@
 [![Docker](https://img.shields.io/badge/docker-available-blue.svg)](https://www.docker.com/)
 [![Awesome Beancount](https://awesome.re/badge.svg)](https://awesome-beancount.com/#china)
 
-> **项目旨在探索 GTD 方法论对财务状况管理的最佳实践**。现已被 [Awesome Beancount](https://awesome-beancount.com/#china) 官方资源列表收录，成为服务中国区用户的核心工具。
-
 ## 一句话说明
 
-上传账单，自动转换为可审计的 Beancount 复式记账数据，并在几分钟内分析财务报表。
+**上传账单，自动转换为可审计的 Beancount 复式记账数据，并在几分钟内分析财务报表**。
+
+> 现已被 [Awesome Beancount](https://awesome-beancount.com/#china) 官方资源列表收录，成为服务中国区用户的核心工具。
 
 ## 30 秒判断：是否适合你
 
 ### 适合
 
-- 你已在用 Beancount，希望规范化、减轻逐笔决策，并在同一条目中尽可能保留更多信息。
 - 你已有支付宝、微信或银行账单，想快速进入 Beancount。
+- 你已在用 Beancount，希望规范化、减轻逐笔决策，并在同一条目中尽可能保留更多信息。
 - 你希望使用云平台，或自行部署到私有环境。
 
 ### 可能不适合
