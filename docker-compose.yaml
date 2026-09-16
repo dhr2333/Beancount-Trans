@@ -14,6 +14,8 @@ services:
     depends_on:
       beancount-trans-backend:
         condition: service_started
+      beancount-trans-mcp:
+        condition: service_started
 
   # ===== 后端 (Django + uWSGI) =====
   beancount-trans-backend:
@@ -34,6 +36,28 @@ services:
       - ./Beancount-Trans-Backend/Assets:/code/beancount-trans/Assets
       - collectstatic:/code/beancount-trans/collectstatic
       - /var/run/docker.sock:/var/run/docker.sock:ro
+    depends_on:
+      beancount-trans-postgres:
+        condition: service_healthy
+      beancount-trans-redis:
+        condition: service_healthy
+
+  # ===== MCP 服务（Streamable HTTP，供 Claude Code / Cursor 等 AI 客户端接入）=====
+  # 与 backend 同镜像、独立 ASGI 进程；仅在 compose 网络内暴露，由前端 Nginx 按 /mcp 反代
+  beancount-trans-mcp:
+    image: dhr2333/beancount-trans-backend:latest
+    container_name: beancount-trans-mcp
+    restart: always
+    command: >
+      bash -c "
+        cd /code/beancount-trans &&
+        uvicorn project.apps.mcp.asgi:app --host 0.0.0.0 --port 8001
+        --proxy-headers --forwarded-allow-ips '*'
+      "
+    env_file: .env
+    volumes:
+      # 与 backend 相同挂载；MCP 只读账本，不提供写入能力
+      - ./Beancount-Trans-Backend/Assets:/code/beancount-trans/Assets
     depends_on:
       beancount-trans-postgres:
         condition: service_healthy
@@ -94,11 +118,10 @@ services:
     volumes:
       - postgres:/var/lib/postgresql/18/docker
     healthcheck:
-      test:
-        [
+      test: [
           "CMD-SHELL",
           "pg_isready -d ${TRANS_POSTGRESQL_DATABASE:-beancount-trans} -U
-            ${TRANS_POSTGRESQL_USER:-root}",
+          ${TRANS_POSTGRESQL_USER:-root}",
         ]
       interval: 10s
       timeout: 5s
@@ -118,7 +141,7 @@ services:
     volumes:
       - redis:/data
     healthcheck:
-      test: [ "CMD", "redis-cli", "-a", "${TRANS_REDIS_PASSWORD:-root}", "ping" ]
+      test: ["CMD", "redis-cli", "-a", "${TRANS_REDIS_PASSWORD:-root}", "ping"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -138,7 +161,11 @@ services:
     volumes:
       - minio:/data
     healthcheck:
-      test: [ "CMD-SHELL", "curl -f http://localhost:9000/minio/health/live || exit 1" ]
+      test:
+        [
+          "CMD-SHELL",
+          "curl -f http://localhost:9000/minio/health/live || exit 1",
+        ]
       interval: 10s
       timeout: 5s
       retries: 5
